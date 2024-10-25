@@ -91,7 +91,7 @@ function App() {
 
 
       {/* Author Input Form */}
-      <Box component="form" onSubmit={handleSubmit} style={{ marginBottom: '20px', textAlign: 'center' }}>
+      <Box component="form" onSubmit={handleSubmit} style={{ marginBottom: '80px', textAlign: 'center' }}>
         <TextField
           label="Author Name"
           variant="outlined"
@@ -100,7 +100,9 @@ function App() {
           style={{ marginRight: '10px' }}
           placeholder='Enter author name'
         />
-        <Button type="submit" variant="contained" color="primary">
+        <Button type="submit" variant="contained" color="primary" style={{
+          padding: '15px 20px',
+        }}>
           Search
         </Button>
         <Typography variant="body2" color="text.secondary" style={{ marginTop: '10px' }}>
@@ -128,8 +130,10 @@ function App() {
               // const globalRank = allPlugins.sort((a, b) => b.active_installs - a.active_installs).indexOf(plugin) + 1;
 
               return (
-                <Grid item key={plugin.slug} xs={12} sm={6} md={4}>
-                  <Card>
+                <Grid item key={plugin.slug} xs={12} sm={6} md={4} >
+                  <Card style={{
+                    position: 'relative',
+                  }}>
                     <CardMedia
                       component="img"
                       style={{
@@ -152,15 +156,26 @@ function App() {
                         variant="body2"
                         style={{
                           display: 'inline-block',
-                          padding: '4px 8px',
-                          borderRadius: '12px',
+                          // padding: '4px 8px',
+                          borderRadius: '50%',
                           backgroundColor: plugin.active_installs < 1000 ? '#ffcccb' : plugin.active_installs < 10000 ? '#fff68f' : '#98fb98',
                           color: '#333',
                           fontWeight: 'bold',
-                          marginBottom: '10px',
+                          // marginBottom: '10px',
+                          position: 'absolute',
+                          top: '10px',
+                          right: '10px',
+                          width: '28px',
+                          height: '28px',
+                          textAlign: 'center',
+                          lineHeight: '28px',
+
                         }}
                       >
-                        {localRank}
+                        {/* {localRank}
+                        make 2digit number */}
+                        {/* {localRank} */}
+                         {localRank < 10 ? `0${localRank}` : localRank}
                         {/* {getBadge(localRank)} */}
                       </Typography>
 
