@@ -326,7 +326,15 @@ function App() {
                           )}
                         </Typography>
                       )}
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        style={
+                          !author
+                            ? { marginBottom: "15px" }
+                            : { marginBottom: "0px" }
+                        }
+                      >
                         {`Active Installs: ${formatActiveInstalls(
                           plugin.active_installs
                         )}`}
