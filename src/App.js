@@ -74,7 +74,8 @@ function App() {
 
   const formatActiveInstalls = (activeInstalls) => {
     if (activeInstalls < 10) {
-      return `less than 10`;
+      // return `less than 10`;
+      return `<10`;
     } else if (activeInstalls < 1000) {
       return `${activeInstalls}+`;
     } else if (activeInstalls < 1000000) {
@@ -326,7 +327,7 @@ function App() {
                           )}
                         </Typography>
                       )}
-                      <Typography
+                      {/* <Typography
                         variant="body2"
                         color="text.secondary"
                         style={
@@ -338,6 +339,27 @@ function App() {
                         {`Active Installs: ${formatActiveInstalls(
                           plugin.active_installs
                         )}`}
+                      </Typography> */}
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          color: "rgb(51, 51, 51)",
+                          padding: "20px 0px 4px 0",
+                          // borderRadius: '5px', // Uncomment if needed
+                          fontWeight: "bold",
+                          transform: "rotate(-45deg) translate(-18px, -31px)",
+                          textAlign: "center",
+                          width: "93px",
+                          // lineHeight: '60px', // Uncomment if needed
+                          // height: '60px', // Uncomment if needed
+                          background: "lightgreen",
+                        }}
+                      >
+                        {`${formatActiveInstalls(plugin.active_installs)}`}
                       </Typography>
                       {author && (
                         <Typography
