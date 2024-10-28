@@ -309,7 +309,7 @@ function App() {
                           {`Author: ${username}`}
                         </Typography>
                       )}
-
+{plugin.active_installs >= 10 &&
                       <Typography
                         variant="body2"
                         color="text.secondary"
@@ -332,8 +332,11 @@ function App() {
                               : "#98fb98",
                         }}
                       >
-                        {`${formatActiveInstalls(plugin.active_installs)}`}
+                        {`${formatActiveInstalls(
+                          plugin.active_installs
+                        )}`}
                       </Typography>
+            }
                       {author && (
                         <Typography
                           variant="body2"
@@ -349,7 +352,6 @@ function App() {
                       )}
                       <Typography
                         variant="body2"
-
                         style={{
                           position: "absolute",
                           top: 0,
@@ -357,7 +359,7 @@ function App() {
                           color: "rgba(0, 0, 0, 0.23)",
                           padding: "20px 0px 4px 0",
                           fontWeight: "bold",
-                          transform: "rotate(-45deg) translate(-18px, -31px)",
+                          transform: "rotate(-45deg) translate(-18px, -38px)",
                           textAlign: "center",
                           width: "93px",
                           backgroundColor: "rgb(240 240 247)",
