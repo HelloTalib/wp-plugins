@@ -80,31 +80,45 @@ function App() {
       return `${(activeInstalls / 1000000).toFixed(0)}M+`;
     }
   };
-  const calculatePluginAge = (dateString) => {
-    //data format will be 5 years 3 months ago and 16 days ago and make sure to handle the singular and plural cases correctly.
-    const createdDate = new Date(dateString);
-    const currentDate = new Date();
-    const ageInYears = currentDate.getFullYear() - createdDate.getFullYear();
-    const ageInMonths = currentDate.getMonth() - createdDate.getMonth();
-    const ageInDays = currentDate.getDate() - createdDate.getDate();
-    let ageString = "";
-    if (ageInYears > 0) {
-      ageString += ageInYears === 1 ? "1year " : `${ageInYears}years `;
-    }
-    if (ageInMonths > 0) {
-      // if (ageString) {
-      //   ageString += ageInDays > 0 ? ", " : " and ";
-      // }
-      ageString += ageInMonths === 1 ? "1month " : `${ageInMonths}months `;
-    }
-    if (ageInDays > 0) {
-      // if (ageString) {
-      //   ageString += " and ";
-      // }
-      ageString += ageInDays === 1 ? "1day " : `${ageInDays}days `;
-    }
-    return ageString ? `${ageString}` : "today";
-  };
+const calculatePluginAge = (dateString) => {
+  const createdDate = new Date(dateString);
+  const currentDate = new Date();
+
+  // Check if the difference is less than 24 hours
+  const diffInMilliseconds = currentDate - createdDate;
+  const diffInHours = diffInMilliseconds / (1000 * 60 * 60);
+  if (diffInHours < 24) return "newbie";
+
+  let years = currentDate.getFullYear() - createdDate.getFullYear();
+  let months = currentDate.getMonth() - createdDate.getMonth();
+  let days = currentDate.getDate() - createdDate.getDate();
+
+  // Adjust for negative days and months
+  if (days < 0) {
+    months -= 1;
+    days += new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      0
+    ).getDate();
+  }
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+
+  const pluralize = (value, unit) =>
+    value > 1 ? `${value} ${unit}s` : `${value} ${unit}`;
+
+  let ageParts = [];
+  if (years > 0) ageParts.push(pluralize(years, "year"));
+  if (months > 0) ageParts.push(pluralize(months, "month"));
+  if (days > 0) ageParts.push(pluralize(days, "day"));
+
+  return ageParts.join(", ");
+};
+
+
   const calculateLastUpdated = (dateString) => {
 
     // Normalize the date string by removing "GMT" and adding space before AM/PM if present
@@ -159,7 +173,7 @@ function App() {
       parts.push(`${years}yr${years > 1 ? "s" : ""}`);
     }
     if (months > 0) {
-      parts.push(`${months}mo${months > 1 ? "s" : ""}`);
+      parts.push(`${months}month${months > 1 ? "s" : ""}`);
     }
     if (days > 0) {
       parts.push(`${days}day${days > 1 ? "s" : ""}`);
