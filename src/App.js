@@ -14,18 +14,14 @@ import {
 
 function App() {
   const [plugins, setPlugins] = useState([]);
-  const [copied, setCopied] = useState({}); // Object to track copied state per plugin
+  // const [copied, setCopied] = useState({}); // Object to track copied state per plugin
   const [loading, setLoading] = useState(false);
   const [author, setAuthor] = useState("");
   const [inputAuthor, setInputAuthor] = useState("");
   const [totalPlugins, setTotalPlugins] = useState(0);
 
   const handleCopy = (text, slug) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied((prev) => ({ ...prev, [slug]: true }));
-      setTimeout(() => setCopied((prev) => ({ ...prev, [slug]: false })), 2000);
       setAuthor(text);
-    });
   };
 
   useEffect(() => {
@@ -85,17 +81,6 @@ function App() {
     }
   };
   const calculatePluginAge = (dateString) => {
-    // const createdDate = new Date(dateString);
-    // const currentDate = new Date();
-    // const ageInYears = currentDate.getFullYear() - createdDate.getFullYear();
-
-    // // Additional months check for more accuracy
-    // const monthDifference =
-    //   currentDate.getMonth() - createdDate.getMonth() + ageInYears * 12;
-
-    // if (ageInYears > 1) return `${ageInYears} years ago`;
-    // if (monthDifference > 0) return `${monthDifference} months ago`;
-    // return "Less than a month ago";
     //data format will be 5 years 3 months ago and 16 days ago and make sure to handle the singular and plural cases correctly.
     const createdDate = new Date(dateString);
     const currentDate = new Date();
@@ -104,13 +89,13 @@ function App() {
     const ageInDays = currentDate.getDate() - createdDate.getDate();
     let ageString = "";
     if (ageInYears > 0) {
-      ageString += ageInYears === 1 ? "1yr " : `${ageInYears}yrs `;
+      ageString += ageInYears === 1 ? "1year " : `${ageInYears}years `;
     }
     if (ageInMonths > 0) {
       // if (ageString) {
       //   ageString += ageInDays > 0 ? ", " : " and ";
       // }
-      ageString += ageInMonths === 1 ? "1mo " : `${ageInMonths}mos `;
+      ageString += ageInMonths === 1 ? "1month " : `${ageInMonths}months `;
     }
     if (ageInDays > 0) {
       // if (ageString) {
@@ -118,7 +103,7 @@ function App() {
       // }
       ageString += ageInDays === 1 ? "1day " : `${ageInDays}days `;
     }
-    return ageString ? `${ageString} ago` : "today";
+    return ageString ? `${ageString}` : "today";
   };
   const calculateLastUpdated = (dateString) => {
 
@@ -322,41 +307,29 @@ function App() {
                           onClick={() => handleCopy(username, plugin.slug)}
                         >
                           {`Author: ${username}`}
-                          {copied[plugin.slug] && (
-                            <span style={{ marginLeft: "5px" }}>Copied!</span>
-                          )}
                         </Typography>
                       )}
-                      {/* <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        style={
-                          !author
-                            ? { marginBottom: "15px" }
-                            : { marginBottom: "0px" }
-                        }
-                      >
-                        {`Active Installs: ${formatActiveInstalls(
-                          plugin.active_installs
-                        )}`}
-                      </Typography> */}
+
                       <Typography
                         variant="body2"
                         color="text.secondary"
                         style={{
                           position: "absolute",
                           top: 0,
-                          left: 0,
+                          right: 0,
                           color: "rgb(51, 51, 51)",
                           padding: "20px 0px 4px 0",
-                          // borderRadius: '5px', // Uncomment if needed
                           fontWeight: "bold",
-                          transform: "rotate(-45deg) translate(-18px, -31px)",
+                          transform: "rotate(45deg) translate(18px, -33px)",
                           textAlign: "center",
                           width: "93px",
-                          // lineHeight: '60px', // Uncomment if needed
-                          // height: '60px', // Uncomment if needed
-                          background: "lightgreen",
+
+                          backgroundColor:
+                            plugin.active_installs < 1000
+                              ? "#ffcccb"
+                              : plugin.active_installs < 10000
+                              ? "#fff68f"
+                              : "#98fb98",
                         }}
                       >
                         {`${formatActiveInstalls(plugin.active_installs)}`}
@@ -376,24 +349,18 @@ function App() {
                       )}
                       <Typography
                         variant="body2"
+
                         style={{
-                          display: "inline-block",
-                          borderRadius: "50%",
-                          backgroundColor:
-                            plugin.active_installs < 1000
-                              ? "#ffcccb"
-                              : plugin.active_installs < 10000
-                              ? "#fff68f"
-                              : "#98fb98",
-                          color: "#333",
-                          fontWeight: "bold",
                           position: "absolute",
-                          top: "10px",
-                          right: "10px",
-                          width: "28px",
-                          height: "28px",
+                          top: 0,
+                          left: 0,
+                          color: "rgba(0, 0, 0, 0.23)",
+                          padding: "20px 0px 4px 0",
+                          fontWeight: "bold",
+                          transform: "rotate(-45deg) translate(-18px, -31px)",
                           textAlign: "center",
-                          lineHeight: "28px",
+                          width: "93px",
+                          backgroundColor: "rgb(240 240 247)",
                         }}
                       >
                         {localRank < 10 ? `0${localRank}` : localRank}
