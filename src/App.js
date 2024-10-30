@@ -323,34 +323,32 @@ const calculatePluginAge = (dateString) => {
                           {`Author: ${username}`}
                         </Typography>
                       )}
-{plugin.active_installs >= 10 &&
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          right: 0,
-                          color: "rgb(51, 51, 51)",
-                          padding: "20px 0px 4px 0",
-                          fontWeight: "bold",
-                          transform: "rotate(45deg) translate(18px, -33px)",
-                          textAlign: "center",
-                          width: "93px",
+                      {plugin.active_installs >= 10 && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            right: 0,
+                            color: "rgb(51, 51, 51)",
+                            padding: "20px 0px 4px 0",
+                            fontWeight: "bold",
+                            transform: "rotate(45deg) translate(18px, -33px)",
+                            textAlign: "center",
+                            width: "93px",
 
-                          backgroundColor:
-                            plugin.active_installs < 1000
-                              ? "#ffcccb"
-                              : plugin.active_installs < 10000
-                              ? "#fff68f"
-                              : "#98fb98",
-                        }}
-                      >
-                        {`${formatActiveInstalls(
-                          plugin.active_installs
-                        )}`}
-                      </Typography>
-            }
+                            backgroundColor:
+                              plugin.active_installs < 1000
+                                ? "#ffcccb"
+                                : plugin.active_installs < 10000
+                                ? "#fff68f"
+                                : "#98fb98",
+                          }}
+                        >
+                          {`${formatActiveInstalls(plugin.active_installs)}`}
+                        </Typography>
+                      )}
                       {author && (
                         <Typography
                           variant="body2"
@@ -364,24 +362,25 @@ const calculatePluginAge = (dateString) => {
                           {calculateLastUpdated(plugin.last_updated)}
                         </Typography>
                       )}
-                      <Typography
-                        variant="body2"
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          color: "rgba(0, 0, 0, 0.23)",
-                          padding: "20px 0px 4px 0",
-                          fontWeight: "bold",
-                          transform: "rotate(-45deg) translate(-18px, -38px)",
-                          textAlign: "center",
-                          width: "93px",
-                          backgroundColor: "rgb(240 240 247)",
-                        }}
-                      >
-                        {localRank < 10 ? `0${localRank}` : localRank}
-                      </Typography>
-
+                      <a href={`https://wp-rankings.com/plugins/${plugin.slug}/`}>
+                        <Typography
+                          variant="body2"
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            color: "rgba(0, 0, 0, 0.23)",
+                            padding: "20px 0px 4px 0",
+                            fontWeight: "bold",
+                            transform: "rotate(-45deg) translate(-18px, -38px)",
+                            textAlign: "center",
+                            width: "93px",
+                            backgroundColor: "rgb(240 240 247)",
+                          }}
+                        >
+                          {localRank < 10 ? `0${localRank}` : localRank}
+                        </Typography>
+                      </a>
                       <Typography variant="h5" component="div">
                         {plugin.name
                           .replace(/&#8211;/g, "-")
