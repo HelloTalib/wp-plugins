@@ -14,8 +14,8 @@ import {
 
 // Constants
 const API_BASE_URL = 'https://api.wordpress.org/plugins/info/1.2/';
-const DEFAULT_PER_PAGE = 30;
-const AUTHOR_PER_PAGE = 50;
+const DEFAULT_PER_PAGE = 100;
+const AUTHOR_PER_PAGE = 100;
 
 function App() {
   const [plugins, setPlugins] = useState([]);
