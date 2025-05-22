@@ -1325,13 +1325,13 @@ function App() {
         <>
           {plugins.length > 0 && (
               <>
-                <Box
+                                <Box
                   display="flex"
                   justifyContent="space-between"
                   alignItems="center"
                   mb={3}
                   flexDirection={{ xs: 'column', sm: 'row' }}
-                  gap={1}
+                  gap={2}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box
@@ -1352,6 +1352,77 @@ function App() {
                       {`${totalPlugins.toLocaleString()} ${totalPlugins === 1 ? 'Plugin' : 'Plugins'} Found`}
                     </Typography>
                   </Box>
+
+                  {/* Top pagination buttons */}
+                  {totalPages > 1 && plugins.length > 0 && (
+                    <Box sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      bgcolor: 'rgba(0, 115, 170, 0.05)',
+                      borderRadius: '8px',
+                      p: 0.5,
+                      pl: 2
+                    }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: 'text.secondary',
+                          display: { xs: 'none', sm: 'block' }
+                        }}
+                      >
+                        Page {currentPage} of {Math.min(totalPages, MAX_PAGE)}
+                      </Typography>
+
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Button
+                          disabled={currentPage === 1}
+                          onClick={() => handlePageChange(null, currentPage - 1)}
+                          variant="outlined"
+                          size="small"
+                          aria-label="Previous page"
+                          sx={{
+                            minWidth: 36,
+                            height: 36,
+                            p: 0,
+                            border: '1px solid #e0e0e0',
+                            '&:hover': {
+                              border: '1px solid #0073aa',
+                              bgcolor: 'rgba(0, 115, 170, 0.1)'
+                            },
+                            '&.Mui-disabled': {
+                              opacity: 0.4
+                            }
+                          }}
+                        >
+                          <span aria-hidden="true">‹</span>
+                        </Button>
+                        <Button
+                          disabled={currentPage === Math.min(totalPages, MAX_PAGE)}
+                          onClick={() => handlePageChange(null, currentPage + 1)}
+                          variant="outlined"
+                          size="small"
+                          aria-label="Next page"
+                          sx={{
+                            minWidth: 36,
+                            height: 36,
+                            p: 0,
+                            border: '1px solid #e0e0e0',
+                            '&:hover': {
+                              border: '1px solid #0073aa',
+                              bgcolor: 'rgba(0, 115, 170, 0.1)'
+                            },
+                            '&.Mui-disabled': {
+                              opacity: 0.4
+                            }
+                          }}
+                        >
+                          <span aria-hidden="true">›</span>
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
                 </Box>
                 <Grid container spacing={3}>
               {plugins
@@ -1396,6 +1467,7 @@ function App() {
                 <Typography variant="h6" color="text.primary" gutterBottom>
                   No plugins found
             </Typography>
+
                 <Typography variant="body1" color="text.secondary" paragraph>
                   {author ? `No plugins found for the author "${author}".` :
                    pluginName ? `No plugins found matching "${pluginName}".` :
