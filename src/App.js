@@ -225,7 +225,7 @@ function App() {
 
       // Make sure we have a valid results count
       if (data.info && typeof data.info.results === 'number') {
-        setTotalPlugins(data.info.results);
+      setTotalPlugins(data.info.results);
 
         // Calculate optimal per_page and maximum pages
         // Use isBrowseNew=true since this is always for browse=new
@@ -507,34 +507,34 @@ function App() {
               borderTopRightRadius: '12px'
             }}
           >
-            <a
-              href={`https://wordpress.org/plugins/${plugin.slug}/advanced`}
-              target="_blank"
-              rel="noopener noreferrer"
+          <a
+            href={`https://wordpress.org/plugins/${plugin.slug}/advanced`}
+            target="_blank"
+            rel="noopener noreferrer"
               style={{ display: 'flex', justifyContent: 'center' }}
-            >
-              <CardMedia
-                component="img"
+          >
+            <CardMedia
+              component="img"
                 sx={{
                   objectFit: "contain",
                   height: 120,
                   width: 'auto',
-                  margin: "0 auto",
+                margin: "0 auto",
                   transition: 'transform 0.3s ease',
                   '&:hover': {
                     transform: 'scale(1.05)'
                   }
-                }}
-                image={
-                  plugin.icons
-                    ? plugin.icons["2x"] ||
-                      plugin.icons["1x"] ||
-                      plugin.icons.default
+              }}
+              image={
+                plugin.icons
+                  ? plugin.icons["2x"] ||
+                    plugin.icons["1x"] ||
+                    plugin.icons.default
                     : "https://s.w.org/plugins/geopattern-icon/classic-widgets.svg"
-                }
-                alt={plugin.name}
-              />
-            </a>
+              }
+              alt={plugin.name}
+            />
+          </a>
           </Box>
 
           <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
@@ -557,9 +557,9 @@ function App() {
               {plugin.name.replace(/&#8211;/g, "-").replace(/&amp;/g, "&")}
             </Typography>
 
-            <Typography
-              variant="body2"
-              color="text.secondary"
+              <Typography
+                variant="body2"
+                color="text.secondary"
               sx={{
                 mb: 2,
                 height: '3rem',
@@ -571,7 +571,7 @@ function App() {
               }}
             >
               {plugin.short_description}
-            </Typography>
+              </Typography>
 
             <Box
               sx={{
@@ -591,8 +591,8 @@ function App() {
                 >
                   Age
                 </Typography>
-                <Typography
-                  variant="body2"
+              <Typography
+                variant="body2"
                   sx={{ fontSize: '0.8rem' }}
                 >
                   {calculatePluginAge(plugin.added)}
@@ -603,16 +603,16 @@ function App() {
                 <Box sx={{ textAlign: 'right' }}>
                   <Typography
                     variant="caption"
-                    color="text.secondary"
+                color="text.secondary"
                     sx={{
                       display: 'block',
                       fontWeight: 500
                     }}
                   >
                     Author
-                  </Typography>
-                  <Typography
-                    variant="body2"
+              </Typography>
+              <Typography
+                variant="body2"
                     sx={{
                       fontSize: '0.8rem',
                       cursor: 'pointer',
@@ -624,7 +624,7 @@ function App() {
                     onClick={() => handleCopy(username)}
                   >
                     {username}
-                  </Typography>
+              </Typography>
                 </Box>
               )}
 
@@ -639,13 +639,13 @@ function App() {
                     }}
                   >
                     Updated
-                  </Typography>
-                  <Typography
-                    variant="body2"
+            </Typography>
+            <Typography
+              variant="body2"
                     sx={{ fontSize: '0.8rem' }}
-                  >
+            >
                     {calculateLastUpdated(plugin.last_updated).split(' at')[0]}
-                  </Typography>
+            </Typography>
                 </Box>
               )}
             </Box>
@@ -678,12 +678,12 @@ function App() {
             )}
 
             <Box sx={{ mt: 'auto' }}>
-              <Button
-                variant="contained"
-                color="primary"
-                href={`https://wordpress.org/plugins/${plugin.slug}`}
-                target="_blank"
-                fullWidth
+            <Button
+              variant="contained"
+              color="primary"
+              href={`https://wordpress.org/plugins/${plugin.slug}`}
+              target="_blank"
+              fullWidth
                 sx={{
                   textTransform: 'none',
                   borderRadius: '8px',
@@ -695,7 +695,7 @@ function App() {
                 }}
               >
                 View Plugin
-              </Button>
+            </Button>
             </Box>
           </CardContent>
         </Card>
@@ -732,7 +732,7 @@ function App() {
 
     const activeSearch = getActiveSearch();
 
-    return (
+  return (
       <Box
         sx={{
           background: 'linear-gradient(145deg, #f5f7fa 0%, #e8edf2 100%)',
@@ -759,9 +759,9 @@ function App() {
         />
 
         <Box sx={{ position: 'relative', zIndex: 1 }}>
-          <Typography
+      <Typography
             variant="h5"
-            align="center"
+        align="center"
             gutterBottom
             sx={{
               fontWeight: 600,
@@ -770,10 +770,10 @@ function App() {
             }}
           >
             Find WordPress Plugins
-          </Typography>
+      </Typography>
 
-          <Box
-            component="form"
+      <Box
+        component="form"
             onSubmit={handleSearchSubmit}
             sx={{
               display: "flex",
@@ -799,8 +799,8 @@ function App() {
               </Select>
             </FormControl>
 
-            <TextField
-              variant="outlined"
+        <TextField
+          variant="outlined"
               size="small"
               fullWidth
               value={searchInput}
@@ -821,10 +821,10 @@ function App() {
               }}
             />
 
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
               disabled={!searchInput}
               sx={{
                 textTransform: 'none',
@@ -837,10 +837,10 @@ function App() {
                   bgcolor: '#005d8c'
                 }
               }}
-            >
-              Search
-            </Button>
-          </Box>
+        >
+          Search
+        </Button>
+      </Box>
 
           {activeSearch && (
             <Box display="flex" justifyContent="center" mt={3}>
@@ -1300,9 +1300,9 @@ function App() {
           <Paper
             elevation={0}
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
               flexDirection: "column",
               gap: 2,
               py: 8,
@@ -1319,11 +1319,11 @@ function App() {
               <Typography variant="body2" color="text.secondary">
                 Fetching plugins from WordPress.org
               </Typography>
-            </Box>
+        </Box>
           </Paper>
-        ) : (
-          <>
-            {plugins.length > 0 && (
+      ) : (
+        <>
+          {plugins.length > 0 && (
               <>
                 <Box
                   display="flex"
@@ -1354,15 +1354,15 @@ function App() {
                   </Box>
                 </Box>
                 <Grid container spacing={3}>
-                  {plugins
-                    .sort((a, b) => b.active_installs - a.active_installs)
-                    .map((plugin, index) => renderPluginCard(plugin, index))}
-                </Grid>
+              {plugins
+                .sort((a, b) => b.active_installs - a.active_installs)
+                .map((plugin, index) => renderPluginCard(plugin, index))}
+            </Grid>
                 {renderPagination()}
                 {renderJumpToPage()}
               </>
-            )}
-            {!loading && plugins.length === 0 && (
+          )}
+          {!loading && plugins.length === 0 && (
               <Paper
                 elevation={0}
                 sx={{
@@ -1395,7 +1395,7 @@ function App() {
                 </Box>
                 <Typography variant="h6" color="text.primary" gutterBottom>
                   No plugins found
-                </Typography>
+            </Typography>
                 <Typography variant="body1" color="text.secondary" paragraph>
                   {author ? `No plugins found for the author "${author}".` :
                    pluginName ? `No plugins found matching "${pluginName}".` :
@@ -1422,9 +1422,9 @@ function App() {
                   </Button>
                 )}
               </Paper>
-            )}
-          </>
-        )}
+          )}
+        </>
+      )}
 
         <Box
           sx={{
@@ -1447,7 +1447,7 @@ function App() {
                 {`${calculatePerPage(totalPlugins, MAX_PAGE, !author && !pluginName && !tagName)} plugins per page`}
               </span>
             )}
-          </Typography>
+        </Typography>
         </Box>
 
         {/* Scroll to top button */}
@@ -1480,7 +1480,7 @@ function App() {
             <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↑</span>
           </Box>
         )}
-      </Container>
+    </Container>
     </>
   );
 }
