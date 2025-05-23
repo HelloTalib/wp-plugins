@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Container,
   Grid,
@@ -27,6 +27,70 @@ import {
   Toolbar,
   CssBaseline,
 } from "@mui/material";
+
+// Create a custom theme
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#21759b', // WordPress blue
+      light: '#72aee6',
+      dark: '#135e96',
+      contrastText: '#fff',
+    },
+    secondary: {
+      main: '#d63638', // WordPress red
+      light: '#e65054',
+      dark: '#8c2626',
+      contrastText: '#fff',
+    },
+    background: {
+      default: '#f6f7f7',
+      paper: '#ffffff',
+    },
+  },
+  typography: {
+    fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    h4: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 8,
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 10px 20px rgba(0, 0, 0, 0.12)',
+          },
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontWeight: 600,
+          borderRadius: '6px',
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
+        },
+      },
+    },
+  },
+});
 
 // Constants
 const API_BASE_URL = 'https://api.wordpress.org/plugins/info/1.2/';
@@ -106,6 +170,133 @@ function App() {
     return Math.min(actualPages, MAX_PAGE);
   }, []);
 
+  // New state variables for added features
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState("active_installs");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [minRating, setMinRating] = useState(0);
+  const [wpVersionFilter, setWpVersionFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [installsRange, setInstallsRange] = useState([0, 5000000]);
+  const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('wpPluginFavorites')) || []);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  // Add new state variables for new features
+  const [compareList, setCompareList] = useState([]);
+  const [showCompareDrawer, setShowCompareDrawer] = useState(false);
+  const [selectedPlugin, setSelectedPlugin] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState(
+    JSON.parse(localStorage.getItem('wpPluginRecentlyViewed')) || []
+  );
+  const [showRecentlyViewed, setShowRecentlyViewed] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
+  const [pluginTags, setPluginTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  // Analytics state variables
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [analyticsType, setAnalyticsType] = useState("rating");
+  const [analyticsData, setAnalyticsData] = useState([]);
+  const [topPlugins, setTopPlugins] = useState({});
+  const [pluginsByCategory, setPluginsByCategory] = useState({});
+  const [versionDistribution, setVersionDistribution] = useState({});
+  const [updateFrequency, setUpdateFrequency] = useState({});
+  const [searchHistory, setSearchHistory] = useState(
+    JSON.parse(localStorage.getItem('wpPluginSearchHistory')) || []
+  );
+  const [selectedTagForAnalytics, setSelectedTagForAnalytics] = useState("");
+  const [tagCompetitorData, setTagCompetitorData] = useState([]);
+  const [growthAnalyticsData, setGrowthAnalyticsData] = useState({});
+  const [showGrowthAnalytics, setShowGrowthAnalytics] = useState(false);
+  const [growthHistoryData, setGrowthHistoryData] = useState(
+    JSON.parse(localStorage.getItem('wpPluginGrowthHistory')) || {}
+  );
+  const [selectedPluginsForGrowth, setSelectedPluginsForGrowth] = useState([]);
+  const [growthTimeframe, setGrowthTimeframe] = useState("6months");
+  const [showGrowthTrendChart, setShowGrowthTrendChart] = useState(false);
+  const [selectedPluginForTrend, setSelectedPluginForTrend] = useState(null);
+
+  // Simple function (not useCallback) to get page title to avoid dependency issues
+  function getPageTitleForCSV() {
+    if (showFavoritesOnly) return "favorites";
+    if (!searchTerm) return "new";
+    if (searchType === "author") return `author-${searchTerm}`;
+    if (searchType === "name") return `name-${searchTerm}`;
+    if (searchType === "tag") return `tag-${searchTerm}`;
+    return searchTerm;
+  }
+
+  // Function declarations - moved up to fix initialization order
+  const handleAddToCompare = useCallback((plugin) => {
+    if (compareList.find(p => p.slug === plugin.slug)) {
+      setSnackbarMessage("Plugin already in comparison list");
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    if (compareList.length >= 3) {
+      setSnackbarMessage("You can compare maximum 3 plugins at a time");
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    setCompareList(prev => [...prev, plugin]);
+    setSnackbarMessage(`${plugin.name} added to comparison`);
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
+  }, [compareList]);
+
+  const handleRemoveFromCompare = useCallback((slug) => {
+    setCompareList(prev => prev.filter(p => p.slug !== slug));
+  }, []);
+
+  const handleViewPluginDetails = useCallback((plugin) => {
+    setSelectedPlugin(plugin);
+    setOpenModal(true);
+
+    // Add to recently viewed if not already at the top
+    setRecentlyViewed(prev => {
+      const filtered = prev.filter(p => p.slug !== plugin.slug);
+      return [plugin, ...filtered].slice(0, 10);
+    });
+  }, []);
+
+  const handleClearCompare = useCallback(() => {
+    setCompareList([]);
+    setShowCompareDrawer(false);
+  }, []);
+
+  // Function to toggle tag selection
+  const handleTagToggle = useCallback((tag) => {
+    setSelectedTags(prev => {
+      if (prev.includes(tag)) {
+        return prev.filter(t => t !== tag);
+      } else {
+        return [...prev, tag];
+      }
+    });
+  }, []);
+
+  // Function to handle installs range changes
+  const handleInstallsRangeChange = useCallback((event, newValue) => {
+    setInstallsRange(newValue);
+  }, []);
+
+  // Function to format installs value for display
+  const formatInstallValueText = useCallback((value) => {
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(1)}M+`;
+    } else if (value >= 1000) {
+      return `${(value / 1000).toFixed(0)}k+`;
+    }
+    return `${value}+`;
+  }, []);
+
   // Memoized API call functions
   const fetchPlugins = useCallback(async (authorName, pluginSearchName, tagSearchName, page = 1) => {
     setLoading(true);
@@ -148,6 +339,35 @@ function App() {
       url = `${url}&${params.join('&')}`;
       console.log(`Fetching plugins from: ${url}`);
 
+      // If showing favorites only, don't make API call - we'll filter locally
+      if (showFavoritesOnly && favorites.length === 0) {
+        setPlugins([]);
+        setLoading(false);
+        setTotalPlugins(0);
+        return;
+      }
+
+      if (showFavoritesOnly) {
+        // Fetch individual plugin details for each favorite
+        const favoritePlugins = [];
+        for (const slug of favorites) {
+          try {
+            const pluginResponse = await fetch(`${API_BASE_URL}?action=plugin_information&slug=${slug}`);
+            if (pluginResponse.ok) {
+              const pluginData = await pluginResponse.json();
+              favoritePlugins.push(pluginData);
+            }
+          } catch (e) {
+            console.error(`Failed to fetch favorite plugin: ${slug}`, e);
+          }
+        }
+        setPlugins(favoritePlugins);
+        setTotalPlugins(favoritePlugins.length);
+        setLoading(false);
+        return;
+      }
+
+      console.log(`Fetching plugins: ${url}`);
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch plugins');
 
@@ -217,6 +437,11 @@ function App() {
   }, [totalPlugins, calculatePerPage, calculateMaxPages]);
 
   const fetchTotalPlugins = useCallback(async () => {
+    if (showFavoritesOnly) {
+      setTotalPlugins(favorites.length);
+      return;
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}?action=query_plugins&browse=new&per_page=1`);
       if (!response.ok) throw new Error('Failed to fetch total plugins');
@@ -328,7 +553,7 @@ function App() {
     if (activeInstalls < 10) return `<10`;
     if (activeInstalls < 1000) return `${activeInstalls}+`;
     if (activeInstalls < 1000000) return `${(activeInstalls / 1000).toFixed(0)}k+`;
-    return `${(activeInstalls / 1000000).toFixed(0)}M+`;
+    return `${(activeInstalls / 1000000).toFixed(1)}M+`;
   }, []);
 
   const calculatePluginAge = useCallback((dateString) => {
@@ -381,7 +606,6 @@ function App() {
 
     return `${timeDifference} at ${formattedTime.replace(" ", "")}`;
   }, []);
-
   // Header component
   const renderHeader = () => {
     return (
@@ -410,6 +634,10 @@ function App() {
     const username = plugin.author_profile
       ? plugin.author_profile.split("/").filter(Boolean).pop()
       : "Unknown";
+    const isFavorite = favorites.includes(plugin.slug);
+
+    // Calculate display rating out of 5
+    const displayRating = plugin.rating ? (plugin.rating / 100 * 5) : 0;
 
     return (
       <Grid item key={plugin.slug} xs={12} sm={6} md={4}>
@@ -513,6 +741,18 @@ function App() {
             rel="noopener noreferrer"
               style={{ display: 'flex', justifyContent: 'center' }}
           >
+            {isFavorite ? "❤️" : "🤍"}
+          </IconButton>
+
+          <Box sx={{
+            height: 140,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#f9f9f9',
+            padding: 2,
+            borderBottom: '1px solid #eee'
+          }}>
             <CardMedia
               component="img"
                 sx={{
@@ -680,7 +920,7 @@ function App() {
             <Box sx={{ mt: 'auto' }}>
             <Button
               variant="contained"
-              color="primary"
+              size="medium"
               href={`https://wordpress.org/plugins/${plugin.slug}`}
               target="_blank"
               fullWidth
@@ -838,10 +1078,30 @@ function App() {
                 }
               }}
         >
-          Search
-        </Button>
+          <SpeedDialAction
+            icon="📊"
+            tooltipTitle="Analytics"
+            onClick={() => setShowAnalytics(true)}
+          />
+          <SpeedDialAction
+            icon="🔄"
+            tooltipTitle="Compare Plugins"
+            onClick={() => setShowCompareDrawer(true)}
+            disabled={compareList.length === 0}
+          />
+          <SpeedDialAction
+            icon="📋"
+            tooltipTitle="Export CSV"
+            onClick={handleExportCSV}
+            disabled={filteredAndSortedPlugins.length === 0}
+          />
+          <SpeedDialAction
+            icon="🕒"
+            tooltipTitle="Recently Viewed"
+            onClick={() => setShowRecentlyViewed(true)}
+          />
+        </SpeedDial>
       </Box>
-
           {activeSearch && (
             <Box display="flex" justifyContent="center" mt={3}>
               <Box
