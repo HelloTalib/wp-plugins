@@ -21,86 +21,20 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Pagination,
-  Stack,
-  AppBar,
-  Toolbar,
   CssBaseline,
+  LinearProgress,
+  ThemeProvider,
 } from "@mui/material";
 
-// Create a custom theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#21759b', // WordPress blue
-      light: '#72aee6',
-      dark: '#135e96',
-      contrastText: '#fff',
-    },
-    secondary: {
-      main: '#d63638', // WordPress red
-      light: '#e65054',
-      dark: '#8c2626',
-      contrastText: '#fff',
-    },
-    background: {
-      default: '#f6f7f7',
-      paper: '#ffffff',
-    },
-  },
-  typography: {
-    fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    h4: {
-      fontWeight: 600,
-    },
-    h6: {
-      fontWeight: 600,
-    },
-  },
-  shape: {
-    borderRadius: 8,
-  },
-  components: {
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 10px 20px rgba(0, 0, 0, 0.12)',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontWeight: 600,
-          borderRadius: '6px',
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          fontWeight: 500,
-        },
-      },
-    },
-  },
-});
 
 // Constants
 const API_BASE_URL = 'https://api.wordpress.org/plugins/info/1.2/';
 const MAX_PAGE = 999; // Maximum page number supported by the API
-const MIN_PER_PAGE = 20; // Minimum number of items per page
+const MIN_PER_PAGE = 24; // Minimum number of items per page
 const MAX_PER_PAGE = 100; // Maximum number of items per page for better performance
 
 function App() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [plugins, setPlugins] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -170,132 +104,6 @@ function App() {
     return Math.min(actualPages, MAX_PAGE);
   }, []);
 
-  // New state variables for added features
-  const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState("active_installs");
-  const [sortOrder, setSortOrder] = useState("desc");
-  const [minRating, setMinRating] = useState(0);
-  const [wpVersionFilter, setWpVersionFilter] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [installsRange, setInstallsRange] = useState([0, 5000000]);
-  const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('wpPluginFavorites')) || []);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-
-  // Add new state variables for new features
-  const [compareList, setCompareList] = useState([]);
-  const [showCompareDrawer, setShowCompareDrawer] = useState(false);
-  const [selectedPlugin, setSelectedPlugin] = useState(null);
-  const [openModal, setOpenModal] = useState(false);
-  const [recentlyViewed, setRecentlyViewed] = useState(
-    JSON.parse(localStorage.getItem('wpPluginRecentlyViewed')) || []
-  );
-  const [showRecentlyViewed, setShowRecentlyViewed] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
-  const [pluginTags, setPluginTags] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
-
-  // Analytics state variables
-  const [showAnalytics, setShowAnalytics] = useState(false);
-  const [analyticsType, setAnalyticsType] = useState("rating");
-  const [analyticsData, setAnalyticsData] = useState([]);
-  const [topPlugins, setTopPlugins] = useState({});
-  const [pluginsByCategory, setPluginsByCategory] = useState({});
-  const [versionDistribution, setVersionDistribution] = useState({});
-  const [updateFrequency, setUpdateFrequency] = useState({});
-  const [searchHistory, setSearchHistory] = useState(
-    JSON.parse(localStorage.getItem('wpPluginSearchHistory')) || []
-  );
-  const [selectedTagForAnalytics, setSelectedTagForAnalytics] = useState("");
-  const [tagCompetitorData, setTagCompetitorData] = useState([]);
-  const [growthAnalyticsData, setGrowthAnalyticsData] = useState({});
-  const [showGrowthAnalytics, setShowGrowthAnalytics] = useState(false);
-  const [growthHistoryData, setGrowthHistoryData] = useState(
-    JSON.parse(localStorage.getItem('wpPluginGrowthHistory')) || {}
-  );
-  const [selectedPluginsForGrowth, setSelectedPluginsForGrowth] = useState([]);
-  const [growthTimeframe, setGrowthTimeframe] = useState("6months");
-  const [showGrowthTrendChart, setShowGrowthTrendChart] = useState(false);
-  const [selectedPluginForTrend, setSelectedPluginForTrend] = useState(null);
-
-  // Simple function (not useCallback) to get page title to avoid dependency issues
-  function getPageTitleForCSV() {
-    if (showFavoritesOnly) return "favorites";
-    if (!searchTerm) return "new";
-    if (searchType === "author") return `author-${searchTerm}`;
-    if (searchType === "name") return `name-${searchTerm}`;
-    if (searchType === "tag") return `tag-${searchTerm}`;
-    return searchTerm;
-  }
-
-  // Function declarations - moved up to fix initialization order
-  const handleAddToCompare = useCallback((plugin) => {
-    if (compareList.find(p => p.slug === plugin.slug)) {
-      setSnackbarMessage("Plugin already in comparison list");
-      setSnackbarSeverity("warning");
-      setSnackbarOpen(true);
-      return;
-    }
-
-    if (compareList.length >= 3) {
-      setSnackbarMessage("You can compare maximum 3 plugins at a time");
-      setSnackbarSeverity("warning");
-      setSnackbarOpen(true);
-      return;
-    }
-
-    setCompareList(prev => [...prev, plugin]);
-    setSnackbarMessage(`${plugin.name} added to comparison`);
-    setSnackbarSeverity("success");
-    setSnackbarOpen(true);
-  }, [compareList]);
-
-  const handleRemoveFromCompare = useCallback((slug) => {
-    setCompareList(prev => prev.filter(p => p.slug !== slug));
-  }, []);
-
-  const handleViewPluginDetails = useCallback((plugin) => {
-    setSelectedPlugin(plugin);
-    setOpenModal(true);
-
-    // Add to recently viewed if not already at the top
-    setRecentlyViewed(prev => {
-      const filtered = prev.filter(p => p.slug !== plugin.slug);
-      return [plugin, ...filtered].slice(0, 10);
-    });
-  }, []);
-
-  const handleClearCompare = useCallback(() => {
-    setCompareList([]);
-    setShowCompareDrawer(false);
-  }, []);
-
-  // Function to toggle tag selection
-  const handleTagToggle = useCallback((tag) => {
-    setSelectedTags(prev => {
-      if (prev.includes(tag)) {
-        return prev.filter(t => t !== tag);
-      } else {
-        return [...prev, tag];
-      }
-    });
-  }, []);
-
-  // Function to handle installs range changes
-  const handleInstallsRangeChange = useCallback((event, newValue) => {
-    setInstallsRange(newValue);
-  }, []);
-
-  // Function to format installs value for display
-  const formatInstallValueText = useCallback((value) => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)}M+`;
-    } else if (value >= 1000) {
-      return `${(value / 1000).toFixed(0)}k+`;
-    }
-    return `${value}+`;
-  }, []);
 
   // Memoized API call functions
   const fetchPlugins = useCallback(async (authorName, pluginSearchName, tagSearchName, page = 1) => {
@@ -339,33 +147,6 @@ function App() {
       url = `${url}&${params.join('&')}`;
       console.log(`Fetching plugins from: ${url}`);
 
-      // If showing favorites only, don't make API call - we'll filter locally
-      if (showFavoritesOnly && favorites.length === 0) {
-        setPlugins([]);
-        setLoading(false);
-        setTotalPlugins(0);
-        return;
-      }
-
-      if (showFavoritesOnly) {
-        // Fetch individual plugin details for each favorite
-        const favoritePlugins = [];
-        for (const slug of favorites) {
-          try {
-            const pluginResponse = await fetch(`${API_BASE_URL}?action=plugin_information&slug=${slug}`);
-            if (pluginResponse.ok) {
-              const pluginData = await pluginResponse.json();
-              favoritePlugins.push(pluginData);
-            }
-          } catch (e) {
-            console.error(`Failed to fetch favorite plugin: ${slug}`, e);
-          }
-        }
-        setPlugins(favoritePlugins);
-        setTotalPlugins(favoritePlugins.length);
-        setLoading(false);
-        return;
-      }
 
       console.log(`Fetching plugins: ${url}`);
       const response = await fetch(url);
@@ -437,10 +218,7 @@ function App() {
   }, [totalPlugins, calculatePerPage, calculateMaxPages]);
 
   const fetchTotalPlugins = useCallback(async () => {
-    if (showFavoritesOnly) {
-      setTotalPlugins(favorites.length);
-      return;
-    }
+
 
     try {
       const response = await fetch(`${API_BASE_URL}?action=query_plugins&browse=new&per_page=1`);
@@ -606,24 +384,6 @@ function App() {
 
     return `${timeDifference} at ${formattedTime.replace(" ", "")}`;
   }, []);
-  // Header component
-  const renderHeader = () => {
-    return (
-      <Container style={{ paddingTop: "20px", paddingBottom: "20px" }}>
-        <Typography variant="h4" align="center" gutterBottom style={{ fontWeight: 600, marginBottom: "10px" }}>
-          WordPress Plugin Explorer
-        </Typography>
-        <Typography
-          variant="body1"
-          align="center"
-          color="text.secondary"
-          style={{ marginBottom: "30px" }}
-        >
-          Discover and explore WordPress plugins from the official repository
-        </Typography>
-      </Container>
-    );
-  };
 
   // Memoized plugin card renderer
   const renderPluginCard = useCallback((plugin, index) => {
@@ -634,7 +394,6 @@ function App() {
     const username = plugin.author_profile
       ? plugin.author_profile.split("/").filter(Boolean).pop()
       : "Unknown";
-    const isFavorite = favorites.includes(plugin.slug);
 
     // Calculate display rating out of 5
     const displayRating = plugin.rating ? (plugin.rating / 100 * 5) : 0;
@@ -650,13 +409,15 @@ function App() {
             transition: 'all 0.3s ease',
             overflow: 'visible',
             borderRadius: '12px',
+            border: '1px solid rgba(0,0,0,0.05)',
+            boxShadow: '0 6px 16px rgba(0,0,0,0.05)',
             '&:hover': {
-              transform: 'translateY(-4px)',
-              boxShadow: '0 12px 20px rgba(0,0,0,0.1)'
+              transform: 'translateY(-6px)',
+              boxShadow: '0 16px 30px rgba(0,0,0,0.1)'
             }
           }}
         >
-          {/* Rank badge via wp-rankings */}
+          {/* Rank badge with improved styling */}
           <a
             target="_blank"
             rel="noopener noreferrer"
@@ -666,28 +427,33 @@ function App() {
             <Box
               sx={{
                 position: 'absolute',
-                top: -10,
-                left: -10,
-                width: 40,
-                height: 40,
+                top: -12,
+                left: -12,
+                width: 44,
+                height: 44,
                 bgcolor: 'white',
-                color: '#555',
+                color: '#333',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 'bold',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                 zIndex: 1,
-                fontSize: '0.875rem',
-                border: '2px solid #f0f0f0'
+                fontSize: '0.9rem',
+                border: '2px solid #f8f8f8',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.12)',
+                  transform: 'scale(1.05)'
+                }
               }}
             >
               {localRank < 10 ? `0${localRank}` : localRank}
             </Box>
           </a>
 
-          {/* Active installs badge via plugintests */}
+          {/* Active installs badge with improved styling */}
           {plugin.active_installs >= 10 && (
             <a
               href={`https://plugintests.com/plugins/wporg/${plugin.slug}`}
@@ -698,24 +464,30 @@ function App() {
               <Box
                 sx={{
                   position: 'absolute',
-                  top: -10,
-                  right: -10,
-                  height: 40,
+                  top: -12,
+                  right: -12,
+                  height: 32,
                   paddingX: 2,
                   bgcolor: plugin.active_installs < 1000
-                    ? "#ffcccb"
+                    ? "rgba(255, 204, 203, 0.9)"
                     : plugin.active_installs < 10000
-                    ? "#fff68f"
-                    : "#98fb98",
+                    ? "rgba(255, 246, 143, 0.9)"
+                    : "rgba(152, 251, 152, 0.9)",
                   color: '#333',
                   borderRadius: '20px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontWeight: 'bold',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  fontWeight: 600,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   zIndex: 1,
-                  fontSize: '0.875rem'
+                  fontSize: '0.8rem',
+                  transition: 'all 0.2s ease',
+                  backdropFilter: 'blur(4px)',
+                  '&:hover': {
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.12)',
+                    transform: 'scale(1.05)'
+                  }
                 }}
               >
                 {formatActiveInstalls(plugin.active_installs)} active
@@ -723,58 +495,57 @@ function App() {
             </a>
           )}
 
+          {/* Header section with favorite icon and plugin icon */}
           <Box
             sx={{
-              p: 2,
-              bgcolor: '#f9f9f9',
+              p: 2.5,
+              bgcolor: '#fafafa',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              height: 150,
+              height: 160,
               borderTopLeftRadius: '12px',
-              borderTopRightRadius: '12px'
+              borderTopRightRadius: '12px',
+              borderBottom: '1px solid rgba(0,0,0,0.06)'
             }}
           >
-          <a
-            href={`https://wordpress.org/plugins/${plugin.slug}/advanced`}
-            target="_blank"
-            rel="noopener noreferrer"
-              style={{ display: 'flex', justifyContent: 'center' }}
-          >
-            {isFavorite ? "❤️" : "🤍"}
-          </IconButton>
 
-          <Box sx={{
-            height: 140,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f9f9f9',
-            padding: 2,
-            borderBottom: '1px solid #eee'
-          }}>
-            <CardMedia
-              component="img"
+            <Box sx={{
+              height: 130,
+              width: 130,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 2,
+              borderRadius: '12px',
+              backgroundColor: 'white',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+              transition: 'transform 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: '0 6px 16px rgba(0,0,0,0.08)'
+              }
+            }}>
+              <CardMedia
+                component="img"
                 sx={{
                   objectFit: "contain",
-                  height: 120,
+                  height: 100,
                   width: 'auto',
-                margin: "0 auto",
+                  margin: "0 auto",
                   transition: 'transform 0.3s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)'
-                  }
-              }}
-              image={
-                plugin.icons
-                  ? plugin.icons["2x"] ||
-                    plugin.icons["1x"] ||
-                    plugin.icons.default
-                    : "https://s.w.org/plugins/geopattern-icon/classic-widgets.svg"
-              }
-              alt={plugin.name}
-            />
-          </a>
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                }}
+                image={
+                  plugin.icons
+                    ? plugin.icons["2x"] ||
+                      plugin.icons["1x"] ||
+                      plugin.icons.default
+                      : "https://s.w.org/plugins/geopattern-icon/classic-widgets.svg"
+                }
+                alt={plugin.name}
+              />
+            </Box>
           </Box>
 
           <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
@@ -782,42 +553,71 @@ function App() {
               variant="h6"
               component="div"
               sx={{
-                mb: 1,
-                fontWeight: 600,
+                mb: 1.5,
+                fontWeight: 700,
                 lineHeight: 1.3,
                 fontSize: '1.1rem',
-                height: '2.6rem',
+                height: '2.8rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
+                WebkitBoxOrient: 'vertical',
+                color: '#1a1a1a'
               }}
             >
               {plugin.name.replace(/&#8211;/g, "-").replace(/&amp;/g, "&")}
             </Typography>
 
-              <Typography
-                variant="body2"
-                color="text.secondary"
+            {/* Rating stars */}
+            {displayRating > 0 && (
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                <Box sx={{ display: 'flex', mr: 1 }}>
+                  {[...Array(5)].map((_, i) => (
+                    <Box
+                      key={i}
+                      component="span"
+                      sx={{
+                        color: i < Math.floor(displayRating) ? '#FFB400' : '#e0e0e0',
+                        fontSize: '1rem',
+                        mr: 0.3
+                      }}
+                    >
+                      ★
+                    </Box>
+                  ))}
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {displayRating.toFixed(1)}
+                </Typography>
+              </Box>
+            )}
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
               sx={{
-                mb: 2,
+                mb: 2.5,
                 height: '3rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
+                WebkitBoxOrient: 'vertical',
+                fontSize: '0.9rem',
+                lineHeight: 1.5
               }}
             >
               {plugin.short_description}
-              </Typography>
+            </Typography>
 
             <Box
               sx={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                mb: 2
+                mb: 2.5,
+                pb: 2,
+                borderBottom: '1px solid rgba(0,0,0,0.06)'
               }}
             >
               <Box>
@@ -826,14 +626,22 @@ function App() {
                   color="text.secondary"
                   sx={{
                     display: 'block',
-                    fontWeight: 500
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    mb: 0.5
                   }}
                 >
                   Age
                 </Typography>
-              <Typography
-                variant="body2"
-                  sx={{ fontSize: '0.8rem' }}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    color: '#444'
+                  }}
                 >
                   {calculatePluginAge(plugin.added)}
                 </Typography>
@@ -843,28 +651,34 @@ function App() {
                 <Box sx={{ textAlign: 'right' }}>
                   <Typography
                     variant="caption"
-                color="text.secondary"
+                    color="text.secondary"
                     sx={{
                       display: 'block',
-                      fontWeight: 500
+                      fontWeight: 600,
+                      fontSize: '0.7rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      mb: 0.5
                     }}
                   >
                     Author
-              </Typography>
-              <Typography
-                variant="body2"
+                  </Typography>
+                  <Typography
+                    variant="body2"
                     sx={{
-                      fontSize: '0.8rem',
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
                       cursor: 'pointer',
+                      color: '#0073aa',
                       '&:hover': {
-                        color: '#0073aa',
+                        color: '#005d8c',
                         textDecoration: 'underline'
                       }
                     }}
                     onClick={() => handleCopy(username)}
                   >
                     {username}
-              </Typography>
+                  </Typography>
                 </Box>
               )}
 
@@ -875,17 +689,25 @@ function App() {
                     color="text.secondary"
                     sx={{
                       display: 'block',
-                      fontWeight: 500
+                      fontWeight: 600,
+                      fontSize: '0.7rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      mb: 0.5
                     }}
                   >
                     Updated
-            </Typography>
-            <Typography
-              variant="body2"
-                    sx={{ fontSize: '0.8rem' }}
-            >
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                      color: '#444'
+                    }}
+                  >
                     {calculateLastUpdated(plugin.last_updated).split(' at')[0]}
-            </Typography>
+                  </Typography>
                 </Box>
               )}
             </Box>
@@ -908,6 +730,9 @@ function App() {
                       cursor: "pointer",
                       bgcolor: 'rgba(0,115,170,0.08)',
                       color: '#0073aa',
+                      fontSize: '0.75rem',
+                      height: '24px',
+                      fontWeight: 500,
                       '&:hover': {
                         bgcolor: 'rgba(0,115,170,0.15)',
                       }
@@ -918,24 +743,27 @@ function App() {
             )}
 
             <Box sx={{ mt: 'auto' }}>
-            <Button
-              variant="contained"
-              size="medium"
-              href={`https://wordpress.org/plugins/${plugin.slug}`}
-              target="_blank"
-              fullWidth
+              <Button
+                variant="contained"
+                size="medium"
+                href={`https://wordpress.org/plugins/${plugin.slug}`}
+                target="_blank"
+                fullWidth
                 sx={{
                   textTransform: 'none',
                   borderRadius: '8px',
-                  py: 1,
+                  py: 1.2,
+                  fontWeight: 600,
                   bgcolor: '#0073aa',
+                  boxShadow: '0 4px 12px rgba(0,115,170,0.2)',
                   '&:hover': {
-                    bgcolor: '#005d8c'
+                    bgcolor: '#005d8c',
+                    boxShadow: '0 6px 16px rgba(0,115,170,0.3)'
                   }
                 }}
               >
                 View Plugin
-            </Button>
+              </Button>
             </Box>
           </CardContent>
         </Card>
@@ -972,56 +800,86 @@ function App() {
 
     const activeSearch = getActiveSearch();
 
-  return (
+    return (
       <Box
         sx={{
-          background: 'linear-gradient(145deg, #f5f7fa 0%, #e8edf2 100%)',
+          background: 'linear-gradient(145deg, #ffffff 0%, #f0f7fa 100%)',
           borderRadius: '16px',
-          p: { xs: 2, md: 3 },
-          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          p: { xs: 3, md: 4 },
+          boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
           mb: 4,
           position: 'relative',
           overflow: 'hidden'
         }}
       >
-        {/* Decorative element */}
+        {/* Decorative elements */}
+        <Box
+          sx={{
+            position: 'absolute',
+            width: '250px',
+            height: '250px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(0,115,170,0.05) 0%, rgba(0,115,170,0) 70%)',
+            top: '-120px',
+            right: '-50px',
+            zIndex: 0
+          }}
+        />
         <Box
           sx={{
             position: 'absolute',
             width: '200px',
             height: '200px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(0,115,170,0.1) 0%, rgba(0,115,170,0) 70%)',
-            top: '-100px',
-            right: '-50px',
+            background: 'radial-gradient(circle, rgba(0,115,170,0.05) 0%, rgba(0,115,170,0) 70%)',
+            bottom: '-80px',
+            left: '-80px',
             zIndex: 0
           }}
         />
 
         <Box sx={{ position: 'relative', zIndex: 1 }}>
-      <Typography
+          <Typography
             variant="h5"
-        align="center"
+            align="center"
             gutterBottom
             sx={{
-              fontWeight: 600,
+              fontWeight: 700,
               color: "#1a1a1a",
-              mb: 3
+              mb: 1
             }}
           >
-            Find WordPress Plugins
-      </Typography>
+            Explore WordPress Plugins
+          </Typography>
 
-      <Box
-        component="form"
+          <Typography
+            variant="body1"
+            align="center"
+            color="text.secondary"
+            sx={{
+              mb: 4,
+              maxWidth: '600px',
+              mx: 'auto'
+            }}
+          >
+            Search by author, name or tag to find the perfect plugin for your needs
+          </Typography>
+
+          <Paper
+            elevation={0}
+            component="form"
             onSubmit={handleSearchSubmit}
             sx={{
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
               gap: { xs: 2, md: 1.5 },
               alignItems: { xs: "stretch", md: "flex-end" },
-              maxWidth: '800px',
-              mx: 'auto'
+              maxWidth: '900px',
+              mx: 'auto',
+              p: { xs: 2, md: 3 },
+              borderRadius: '12px',
+              border: '1px solid #eaecef',
+              bgcolor: 'white'
             }}
           >
             <FormControl sx={{ minWidth: { xs: "100%", md: "180px" } }}>
@@ -1031,7 +889,7 @@ function App() {
                 value={searchType}
                 label="Search By"
                 onChange={(e) => setSearchType(e.target.value)}
-                size="small"
+                size="medium"
               >
                 <MenuItem value="author">Author</MenuItem>
                 <MenuItem value="plugin">Plugin Name</MenuItem>
@@ -1039,9 +897,9 @@ function App() {
               </Select>
             </FormControl>
 
-        <TextField
-          variant="outlined"
-              size="small"
+            <TextField
+              variant="outlined"
+              size="medium"
               fullWidth
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -1061,47 +919,28 @@ function App() {
               }}
             />
 
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
               disabled={!searchInput}
+              startIcon={<span style={{ fontSize: '1.2rem' }}>🔍</span>}
               sx={{
                 textTransform: 'none',
                 borderRadius: "8px",
-                py: 1,
+                py: 1.5,
                 px: 3,
-                minWidth: { xs: "100%", md: "140px" },
+                minWidth: { xs: "100%", md: "160px" },
                 bgcolor: '#0073aa',
+                fontWeight: 600,
                 '&:hover': {
                   bgcolor: '#005d8c'
                 }
               }}
-        >
-          <SpeedDialAction
-            icon="📊"
-            tooltipTitle="Analytics"
-            onClick={() => setShowAnalytics(true)}
-          />
-          <SpeedDialAction
-            icon="🔄"
-            tooltipTitle="Compare Plugins"
-            onClick={() => setShowCompareDrawer(true)}
-            disabled={compareList.length === 0}
-          />
-          <SpeedDialAction
-            icon="📋"
-            tooltipTitle="Export CSV"
-            onClick={handleExportCSV}
-            disabled={filteredAndSortedPlugins.length === 0}
-          />
-          <SpeedDialAction
-            icon="🕒"
-            tooltipTitle="Recently Viewed"
-            onClick={() => setShowRecentlyViewed(true)}
-          />
-        </SpeedDial>
-      </Box>
+            >
+              Search
+            </Button>
+          </Paper>
           {activeSearch && (
             <Box display="flex" justifyContent="center" mt={3}>
               <Box
@@ -1134,511 +973,318 @@ function App() {
     );
   };
 
-  // Pagination component
-  const renderPagination = () => {
-    // Don't show pagination if we have no results or only one page
-    if (totalPages <= 1 || plugins.length === 0) return null;
-
-    // Determine if this is a browse=new query or a filtered query
-    const isBrowseNew = !author && !pluginName && !tagName;
-
-    // Get the actual per_page value being used
-    const effectivePerPage = calculatePerPage(totalPlugins, MAX_PAGE, isBrowseNew);
-
-    // Calculate the start and end items on the current page
-    const startItem = ((currentPage - 1) * effectivePerPage) + 1;
-    // Make sure endItem doesn't exceed total plugin count
-    const endItem = Math.min(currentPage * effectivePerPage, totalPlugins);
-
-    // Ensure current page is within valid range
-    const validCurrentPage = Math.min(Math.max(1, currentPage), Math.min(totalPages, MAX_PAGE));
-    if (validCurrentPage !== currentPage) {
-      // If current page is invalid, set it to a valid value
-      console.log(`Current page ${currentPage} is invalid, setting to ${validCurrentPage}`);
-      setCurrentPage(validCurrentPage);
-    }
-
-    return (
-      <Paper
-        elevation={0}
-        sx={{
-          mt: 5,
-          mb: 3,
-          py: 2.5,
-          px: 3,
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 2,
-          borderRadius: '12px',
-          backgroundColor: '#f9fafb',
-          border: '1px solid #eaecef'
-        }}
-      >
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ fontWeight: 500 }}
-          >
-            Showing <strong>{startItem}</strong> - <strong>{endItem}</strong> of <strong>{totalPlugins.toLocaleString()}</strong> plugins
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-          >
-            Page <strong>{currentPage}</strong> of <strong>{Math.min(totalPages, MAX_PAGE).toLocaleString()}</strong> {totalPages > MAX_PAGE ? `(limited to ${MAX_PAGE})` : ''}
-          </Typography>
-          {effectivePerPage !== MIN_PER_PAGE && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-            >
-              Displaying {effectivePerPage} plugins per page {isBrowseNew ? 'to view all content' : 'to optimize navigation'}
-            </Typography>
-          )}
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Button
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(null, 1)}
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: { xs: 32, sm: 40 },
-              height: { xs: 32, sm: 40 },
-              p: 0,
-              border: '1px solid #e0e0e0',
-              '&:hover': {
-                border: '1px solid #0073aa',
-                bgcolor: 'rgba(0, 115, 170, 0.04)'
+  // Improved loading indicator component
+  const renderLoadingIndicator = () => (
+    <Paper
+      elevation={0}
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        gap: 3,
+        py: 8,
+        px: 4,
+        borderRadius: '16px',
+        backgroundColor: 'white',
+        border: '1px solid #eaecef',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.08)'
+      }}
+    >
+      <Box sx={{ position: 'relative' }}>
+        <CircularProgress
+          size={60}
+          thickness={4}
+          sx={{
+            color: '#0073aa',
+            animation: 'pulse 1.5s infinite ease-in-out',
+            '@keyframes pulse': {
+              '0%': {
+                boxShadow: '0 0 0 0 rgba(0, 115, 170, 0.4)',
               },
-              display: { xs: 'none', sm: 'flex' }
-            }}
-          >
-            <span aria-hidden="true">«</span>
-          </Button>
-
-          <Button
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(null, currentPage - 1)}
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: { xs: 32, sm: 40 },
-              height: { xs: 32, sm: 40 },
-              p: 0,
-              border: '1px solid #e0e0e0',
-              '&:hover': {
-                border: '1px solid #0073aa',
-                bgcolor: 'rgba(0, 115, 170, 0.04)'
-              }
-            }}
-          >
-            <span aria-hidden="true">‹</span>
-          </Button>
-
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-            }}
-          >
-            {/* Display page numbers - limit display to keep UI manageable */}
-            {Math.min(totalPages, MAX_PAGE) <= 10 ? (
-              // If 10 or fewer pages, show all
-              [...Array(Math.min(totalPages, MAX_PAGE))].map((_, index) => {
-                const pageNumber = index + 1;
-                return (
-                  <Button
-                    key={pageNumber}
-                    variant={pageNumber === currentPage ? "contained" : "outlined"}
-                    onClick={() => handlePageChange(null, pageNumber)}
-                    color={pageNumber === currentPage ? "primary" : "inherit"}
-                    size="small"
-                    sx={{
-                      minWidth: { xs: 32, sm: 40 },
-                      height: { xs: 32, sm: 40 },
-                      p: 0,
-                      bgcolor: pageNumber === currentPage ? '#0073aa' : 'transparent',
-                      border: pageNumber === currentPage ? 'none' : '1px solid #e0e0e0',
-                      '&:hover': {
-                        bgcolor: pageNumber === currentPage ? '#005d8c' : 'rgba(0, 115, 170, 0.04)',
-                        border: pageNumber === currentPage ? 'none' : '1px solid #0073aa'
-                      }
-                    }}
-                  >
-                    {pageNumber}
-                  </Button>
-                );
-              })
-            ) : (
-              // For extremely large page counts, show reduced navigation
-              <>
-                {/* First page */}
-                <Button
-                  key={1}
-                  variant={1 === currentPage ? "contained" : "outlined"}
-                  onClick={() => handlePageChange(null, 1)}
-                  color={1 === currentPage ? "primary" : "inherit"}
-                  size="small"
-                  sx={{
-                    minWidth: { xs: 32, sm: 40 },
-                    height: { xs: 32, sm: 40 },
-                    p: 0,
-                    bgcolor: 1 === currentPage ? '#0073aa' : 'transparent',
-                    border: 1 === currentPage ? 'none' : '1px solid #e0e0e0',
-                    '&:hover': {
-                      bgcolor: 1 === currentPage ? '#005d8c' : 'rgba(0, 115, 170, 0.04)',
-                      border: 1 === currentPage ? 'none' : '1px solid #0073aa'
-                    }
-                  }}
-                >
-                  1
-                </Button>
-
-                {/* Left ellipsis if needed */}
-                {currentPage > 3 && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minWidth: { xs: 32, sm: 40 },
-                      height: { xs: 32, sm: 40 },
-                    }}
-                  >
-                    …
-                  </Box>
-                )}
-
-                {/* Pages around current page */}
-                {[...Array(5)].map((_, index) => {
-                  // Show 2 pages before and 2 pages after current
-                  const offset = index - 2;
-                  const pageNumber = currentPage + offset;
-                  const maxDisplayPage = Math.min(totalPages, MAX_PAGE);
-
-                  // Only show if page is valid and not already shown (first or last)
-                  if (pageNumber > 1 && pageNumber < maxDisplayPage && pageNumber > 0) {
-                    return (
-                      <Button
-                        key={pageNumber}
-                        variant={pageNumber === currentPage ? "contained" : "outlined"}
-                        onClick={() => handlePageChange(null, pageNumber)}
-                        color={pageNumber === currentPage ? "primary" : "inherit"}
-                        size="small"
-                        sx={{
-                          minWidth: { xs: 32, sm: 40 },
-                          height: { xs: 32, sm: 40 },
-                          p: 0,
-                          bgcolor: pageNumber === currentPage ? '#0073aa' : 'transparent',
-                          border: pageNumber === currentPage ? 'none' : '1px solid #e0e0e0',
-                          '&:hover': {
-                            bgcolor: pageNumber === currentPage ? '#005d8c' : 'rgba(0, 115, 170, 0.04)',
-                            border: pageNumber === currentPage ? 'none' : '1px solid #0073aa'
-                          }
-                        }}
-                      >
-                        {pageNumber}
-                      </Button>
-                    );
-                  }
-                  return null;
-                })}
-
-                {/* Right ellipsis if needed */}
-                {currentPage < Math.min(totalPages, MAX_PAGE) - 2 && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minWidth: { xs: 32, sm: 40 },
-                      height: { xs: 32, sm: 40 },
-                    }}
-                  >
-                    …
-                  </Box>
-                )}
-
-                {/* Last page */}
-                {Math.min(totalPages, MAX_PAGE) > 1 && (
-                  <Button
-                    key={Math.min(totalPages, MAX_PAGE)}
-                    variant={Math.min(totalPages, MAX_PAGE) === currentPage ? "contained" : "outlined"}
-                    onClick={() => handlePageChange(null, Math.min(totalPages, MAX_PAGE))}
-                    color={Math.min(totalPages, MAX_PAGE) === currentPage ? "primary" : "inherit"}
-                    size="small"
-                    sx={{
-                      minWidth: { xs: 32, sm: 40 },
-                      height: { xs: 32, sm: 40 },
-                      p: 0,
-                      bgcolor: Math.min(totalPages, MAX_PAGE) === currentPage ? '#0073aa' : 'transparent',
-                      border: Math.min(totalPages, MAX_PAGE) === currentPage ? 'none' : '1px solid #e0e0e0',
-                      '&:hover': {
-                        bgcolor: Math.min(totalPages, MAX_PAGE) === currentPage ? '#005d8c' : 'rgba(0, 115, 170, 0.04)',
-                        border: Math.min(totalPages, MAX_PAGE) === currentPage ? 'none' : '1px solid #0073aa'
-                      }
-                    }}
-                  >
-                    {Math.min(totalPages, MAX_PAGE)}
-                  </Button>
-                )}
-              </>
-            )}
-          </Box>
-
-          <Button
-            disabled={currentPage === Math.min(totalPages, MAX_PAGE)}
-            onClick={() => handlePageChange(null, currentPage + 1)}
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: { xs: 32, sm: 40 },
-              height: { xs: 32, sm: 40 },
-              p: 0,
-              border: '1px solid #e0e0e0',
-              '&:hover': {
-                border: '1px solid #0073aa',
-                bgcolor: 'rgba(0, 115, 170, 0.04)'
-              }
-            }}
-          >
-            <span aria-hidden="true">›</span>
-          </Button>
-
-          <Button
-            disabled={currentPage === Math.min(totalPages, MAX_PAGE)}
-            onClick={() => handlePageChange(null, Math.min(totalPages, MAX_PAGE))}
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: { xs: 32, sm: 40 },
-              height: { xs: 32, sm: 40 },
-              p: 0,
-              border: '1px solid #e0e0e0',
-              '&:hover': {
-                border: '1px solid #0073aa',
-                bgcolor: 'rgba(0, 115, 170, 0.04)'
+              '70%': {
+                boxShadow: '0 0 0 15px rgba(0, 115, 170, 0)',
               },
-              display: { xs: 'none', sm: 'flex' }
-            }}
-          >
-            <span aria-hidden="true">»</span>
-          </Button>
-        </Box>
-      </Paper>
-    );
-  };
-
-  // Add a Jump to Page component to handle large page counts
-  const renderJumpToPage = () => {
-    if (totalPages <= 1 || plugins.length === 0) return null;
-
-    const maxValidPage = Math.min(totalPages, MAX_PAGE);
-
-    const handleJump = (e) => {
-      e.preventDefault();
-      const pageNum = parseInt(jumpPage, 10);
-      if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= maxValidPage) {
-        handlePageChange(null, pageNum);
-        setJumpPage('');
-      }
-    };
-
-    return (
-      <Paper
-        component="form"
-        onSubmit={handleJump}
-        sx={{
-          mt: 2,
-          p: 2,
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: 'center',
-          gap: 2,
-          borderRadius: '12px',
-          bgcolor: '#f9fafb',
-          border: '1px solid #eaecef'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: { xs: '100%', sm: 'auto' } }}>
-          <Typography variant="body2" color="text.secondary">
-            Jump to page:
-          </Typography>
-          <TextField
-            size="small"
-            value={jumpPage}
-            onChange={(e) => setJumpPage(e.target.value)}
-            placeholder={`1-${maxValidPage}`}
-            sx={{ width: '100px' }}
-            inputProps={{
-              type: 'number',
-              min: 1,
-              max: maxValidPage
-            }}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            size="small"
-            disabled={!jumpPage}
-            sx={{
-              textTransform: 'none',
+              '100%': {
+                boxShadow: '0 0 0 0 rgba(0, 115, 170, 0)',
+              },
+            },
+          }}
+        />
+        <Box
+          component="img"
+          src="https://s.w.org/style/images/about/WordPress-logotype-standard.png"
+          alt="WordPress Logo"
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '26px',
+            height: 'auto',
+            opacity: 0.9,
+          }}
+        />
+      </Box>
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography
+          variant="h6"
+          color="text.primary"
+          gutterBottom
+          sx={{ fontWeight: 600 }}
+        >
+          Discovering WordPress Plugins
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ maxWidth: '300px', mx: 'auto', mb: 2 }}
+        >
+          Fetching plugins from the official WordPress repository. This may take a moment...
+        </Typography>
+        <LinearProgress
+          sx={{
+            height: 6,
+            borderRadius: 3,
+            maxWidth: '300px',
+            mx: 'auto',
+            bgcolor: 'rgba(0,115,170,0.1)',
+            '.MuiLinearProgress-bar': {
               bgcolor: '#0073aa',
-              '&:hover': {
-                bgcolor: '#005d8c'
-              }
-            }}
-          >
-            Go
-          </Button>
-        </Box>
+            }
+          }}
+        />
+      </Box>
+    </Paper>
+  );
 
-        {totalPages > MAX_PAGE && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: { xs: 1, sm: 0 } }}>
-            Note: Displaying up to {MAX_PAGE} pages. Showing approximately {calculatePerPage(totalPlugins)} plugins per page.
-          </Typography>
-        )}
-      </Paper>
-    );
-  };
+  // Improved error display component
+  const renderError = () => (
+    <Paper
+      elevation={0}
+      sx={{
+        mb: 4,
+        p: 4,
+        backgroundColor: "rgba(244, 67, 54, 0.03)",
+        borderRadius: "16px",
+        border: '1px solid rgba(244, 67, 54, 0.2)',
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'center', sm: 'flex-start' },
+        gap: 3,
+        maxWidth: '800px',
+        mx: 'auto',
+        textAlign: { xs: 'center', sm: 'left' }
+      }}
+    >
+      <Box
+        sx={{
+          width: 60,
+          height: 60,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'rgba(244, 67, 54, 0.1)',
+          color: '#f44336',
+          fontSize: '2rem',
+          fontWeight: 'bold',
+          flexShrink: 0
+        }}
+      >
+        !
+      </Box>
+      <Box>
+        <Typography
+          variant="h5"
+          color="error.main"
+          fontWeight={700}
+          gutterBottom
+          sx={{ mb: 1 }}
+        >
+          Oops! Something went wrong
+        </Typography>
+        <Typography
+          color="error.main"
+          variant="body1"
+          sx={{
+            mb: 2,
+            opacity: 0.9,
+            fontWeight: 500
+          }}
+        >
+          {error}
+        </Typography>
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={() => setError(null)}
+          sx={{
+            textTransform: 'none',
+            borderRadius: '8px',
+            fontWeight: 600,
+            py: 1
+          }}
+        >
+          Try Again
+        </Button>
+      </Box>
+    </Paper>
+  );
+
+  // Improved empty results component
+  const renderEmptyResults = () => (
+    <Paper
+      elevation={0}
+      sx={{
+        py: 6,
+        px: 4,
+        textAlign: "center",
+        backgroundColor: "#f9fafb",
+        borderRadius: "16px",
+        maxWidth: '600px',
+        mx: 'auto',
+        border: '1px solid #eaecef',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.08)'
+      }}
+    >
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'rgba(0, 0, 0, 0.05)',
+          color: 'text.secondary',
+          fontSize: '2.5rem',
+          mx: 'auto',
+          mb: 3
+        }}
+      >
+        🔍
+      </Box>
+      <Typography
+        variant="h5"
+        color="text.primary"
+        gutterBottom
+        sx={{ fontWeight: 700, mb: 1 }}
+      >
+        No plugins found
+      </Typography>
+
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        paragraph
+        sx={{ mb: 3, maxWidth: '400px', mx: 'auto' }}
+      >
+        {author ? `We couldn't find any plugins for the author "${author}".` :
+         pluginName ? `No plugins found matching "${pluginName}".` :
+         tagName ? `No plugins found with tag "${tagName}".` :
+         `No plugins found. Try a different search.`}
+      </Typography>
+      {(author || pluginName || tagName) && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={clearSearch}
+          startIcon={<span>↩</span>}
+          sx={{
+            mt: 2,
+            textTransform: 'none',
+            bgcolor: '#0073aa',
+            fontWeight: 600,
+            borderRadius: '8px',
+            py: 1.2,
+            px: 3,
+            boxShadow: '0 4px 12px rgba(0,115,170,0.2)',
+            '&:hover': {
+              bgcolor: '#005d8c',
+              boxShadow: '0 6px 16px rgba(0,115,170,0.3)'
+            }
+          }}
+        >
+          Show new plugins instead
+        </Button>
+      )}
+    </Paper>
+  );
 
   return (
-    <>
-      {renderHeader()}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Container maxWidth="lg" sx={{ pb: 8 }}>
-        {error && (
-          <Paper
-            elevation={0}
-            sx={{
-              mb: 4,
-              p: 3,
-              backgroundColor: "rgba(244, 67, 54, 0.05)",
-              borderRadius: "12px",
-              border: '1px solid rgba(244, 67, 54, 0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 2
-            }}
-          >
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'rgba(244, 67, 54, 0.1)',
-                color: '#f44336',
-                fontSize: '1.5rem',
-                fontWeight: 'bold'
-              }}
-            >
-              !
-            </Box>
-            <Box>
-              <Typography variant="subtitle1" color="error.main" fontWeight={600} gutterBottom>
-                Error Occurred
-              </Typography>
-              <Typography color="error.main" variant="body2">
-                {error}
-              </Typography>
-            </Box>
-          </Paper>
-        )}
-
+        {error && renderError()}
         {renderSearchSection()}
 
         {loading ? (
-          <Paper
-            elevation={0}
-            sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-              flexDirection: "column",
-              gap: 2,
-              py: 8,
-              borderRadius: '12px',
-              backgroundColor: '#f9fafb',
-              border: '1px solid #eaecef'
-            }}
-          >
-            <CircularProgress size={48} sx={{ color: '#0073aa' }} />
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" color="text.primary" gutterBottom>
-                Loading Plugins
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Fetching plugins from WordPress.org
-              </Typography>
-        </Box>
-          </Paper>
-      ) : (
-        <>
-          {plugins.length > 0 && (
+          renderLoadingIndicator()
+        ) : (
+          <>
+            {plugins.length > 0 && (
               <>
-                                <Box
+                <Box
                   display="flex"
                   justifyContent="space-between"
                   alignItems="center"
                   mb={3}
-                  flexDirection={{ xs: 'column', sm: 'row' }}
+                  flexDirection={{ xs: "column", sm: "row" }}
                   gap={2}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Box
                       sx={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: 'rgba(0, 115, 170, 0.1)',
-                        color: '#0073aa'
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: "rgba(0, 115, 170, 0.1)",
+                        color: "#0073aa",
                       }}
                     >
                       <span aria-hidden="true">#</span>
                     </Box>
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                      {`${totalPlugins.toLocaleString()} ${totalPlugins === 1 ? 'Plugin' : 'Plugins'} Found`}
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {`${totalPlugins.toLocaleString()} ${
+                        totalPlugins === 1 ? "Plugin" : "Plugins"
+                      } Found`}
                     </Typography>
                   </Box>
 
                   {/* Top pagination buttons */}
                   {totalPages > 1 && plugins.length > 0 && (
-                    <Box sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      bgcolor: 'rgba(0, 115, 170, 0.05)',
-                      borderRadius: '8px',
-                      p: 0.5,
-                      pl: 2
-                    }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        bgcolor: "rgba(0, 115, 170, 0.05)",
+                        borderRadius: "8px",
+                        p: 0.5,
+                        pl: 2,
+                      }}
+                    >
                       <Typography
                         variant="body2"
                         sx={{
                           fontWeight: 500,
-                          color: 'text.secondary',
-                          display: { xs: 'none', sm: 'block' }
+                          color: "text.secondary",
+                          display: { xs: "none", sm: "block" },
                         }}
                       >
                         Page {currentPage} of {Math.min(totalPages, MAX_PAGE)}
                       </Typography>
 
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <Box sx={{ display: "flex", gap: 0.5 }}>
                         <Button
                           disabled={currentPage === 1}
-                          onClick={() => handlePageChange(null, currentPage - 1)}
+                          onClick={() =>
+                            handlePageChange(null, currentPage - 1)
+                          }
                           variant="outlined"
                           size="small"
                           aria-label="Previous page"
@@ -1646,21 +1292,25 @@ function App() {
                             minWidth: 36,
                             height: 36,
                             p: 0,
-                            border: '1px solid #e0e0e0',
-                            '&:hover': {
-                              border: '1px solid #0073aa',
-                              bgcolor: 'rgba(0, 115, 170, 0.1)'
+                            border: "1px solid #e0e0e0",
+                            "&:hover": {
+                              border: "1px solid #0073aa",
+                              bgcolor: "rgba(0, 115, 170, 0.1)",
                             },
-                            '&.Mui-disabled': {
-                              opacity: 0.4
-                            }
+                            "&.Mui-disabled": {
+                              opacity: 0.4,
+                            },
                           }}
                         >
                           <span aria-hidden="true">‹</span>
                         </Button>
                         <Button
-                          disabled={currentPage === Math.min(totalPages, MAX_PAGE)}
-                          onClick={() => handlePageChange(null, currentPage + 1)}
+                          disabled={
+                            currentPage === Math.min(totalPages, MAX_PAGE)
+                          }
+                          onClick={() =>
+                            handlePageChange(null, currentPage + 1)
+                          }
                           variant="outlined"
                           size="small"
                           aria-label="Next page"
@@ -1668,14 +1318,14 @@ function App() {
                             minWidth: 36,
                             height: 36,
                             p: 0,
-                            border: '1px solid #e0e0e0',
-                            '&:hover': {
-                              border: '1px solid #0073aa',
-                              bgcolor: 'rgba(0, 115, 170, 0.1)'
+                            border: "1px solid #e0e0e0",
+                            "&:hover": {
+                              border: "1px solid #0073aa",
+                              bgcolor: "rgba(0, 115, 170, 0.1)",
                             },
-                            '&.Mui-disabled': {
-                              opacity: 0.4
-                            }
+                            "&.Mui-disabled": {
+                              opacity: 0.4,
+                            },
                           }}
                         >
                           <span aria-hidden="true">›</span>
@@ -1685,104 +1335,541 @@ function App() {
                   )}
                 </Box>
                 <Grid container spacing={3}>
-              {plugins
-                .sort((a, b) => b.active_installs - a.active_installs)
-                .map((plugin, index) => renderPluginCard(plugin, index))}
-            </Grid>
-                {renderPagination()}
-                {renderJumpToPage()}
-              </>
-          )}
-          {!loading && plugins.length === 0 && (
-              <Paper
-                elevation={0}
-                sx={{
-                  py: 6,
-                  px: 4,
-                  textAlign: "center",
-                  backgroundColor: "#f9fafb",
-                  borderRadius: "12px",
-                  maxWidth: '600px',
-                  mx: 'auto',
-                  border: '1px solid #eaecef'
-                }}
-              >
-                <Box
+                  {plugins
+                    .sort((a, b) => b.active_installs - a.active_installs)
+                    .map((plugin, index) => renderPluginCard(plugin, index))}
+                </Grid>
+
+                {/* Pagination */}
+                <Paper
+                  elevation={0}
                   sx={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: 'rgba(0, 0, 0, 0.05)',
-                    color: 'text.secondary',
-                    fontSize: '1.5rem',
-                    mx: 'auto',
-                    mb: 2
+                    mt: 5,
+                    mb: 3,
+                    py: 2.5,
+                    px: 3,
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 2,
+                    borderRadius: "12px",
+                    backgroundColor: "#f9fafb",
+                    border: "1px solid #eaecef",
                   }}
                 >
-                  ?
-                </Box>
-                <Typography variant="h6" color="text.primary" gutterBottom>
-                  No plugins found
-            </Typography>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                  >
+                    {/* Calculate values for pagination display */}
+                    {(() => {
+                      // Determine if this is a browse=new query or a filtered query
+                      const isBrowseNew = !author && !pluginName && !tagName;
+                      // Get the actual per_page value being used
+                      const effectivePerPage = calculatePerPage(
+                        totalPlugins,
+                        MAX_PAGE,
+                        isBrowseNew
+                      );
+                      // Calculate the start and end items on the current page
+                      const startItem =
+                        (currentPage - 1) * effectivePerPage + 1;
+                      // Make sure endItem doesn't exceed total plugin count
+                      const endItem = Math.min(
+                        currentPage * effectivePerPage,
+                        totalPlugins
+                      );
 
-                <Typography variant="body1" color="text.secondary" paragraph>
-                  {author ? `No plugins found for the author "${author}".` :
-                   pluginName ? `No plugins found matching "${pluginName}".` :
-                   tagName ? `No plugins found with tag "${tagName}".` :
-                   `No plugins found. Try a different search.`}
-                </Typography>
-                {(author || pluginName || tagName) && (
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={clearSearch}
-                    sx={{
-                      mt: 2,
-                      textTransform: 'none',
-                      borderColor: '#0073aa',
-                      color: '#0073aa',
-                      '&:hover': {
-                        borderColor: '#005d8c',
-                        backgroundColor: 'rgba(0, 115, 170, 0.04)'
+                      return (
+                        <>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontWeight: 500 }}
+                          >
+                            Showing <strong>{startItem}</strong> -{" "}
+                            <strong>{endItem}</strong> of{" "}
+                            <strong>{totalPlugins.toLocaleString()}</strong>{" "}
+                            plugins
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Page <strong>{currentPage}</strong> of{" "}
+                            <strong>
+                              {Math.min(totalPages, MAX_PAGE).toLocaleString()}
+                            </strong>{" "}
+                            {totalPages > MAX_PAGE
+                              ? `(limited to ${MAX_PAGE})`
+                              : ""}
+                          </Typography>
+                          {effectivePerPage !== MIN_PER_PAGE && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              Displaying {effectivePerPage} plugins per page{" "}
+                              {isBrowseNew
+                                ? "to view all content"
+                                : "to optimize navigation"}
+                            </Typography>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </Box>
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Button
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(null, 1)}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: { xs: 32, sm: 40 },
+                        height: { xs: 32, sm: 40 },
+                        p: 0,
+                        border: "1px solid #e0e0e0",
+                        "&:hover": {
+                          border: "1px solid #0073aa",
+                          bgcolor: "rgba(0, 115, 170, 0.04)",
+                        },
+                        display: { xs: "none", sm: "flex" },
+                      }}
+                    >
+                      <span aria-hidden="true">«</span>
+                    </Button>
+
+                    <Button
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(null, currentPage - 1)}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: { xs: 32, sm: 40 },
+                        height: { xs: 32, sm: 40 },
+                        p: 0,
+                        border: "1px solid #e0e0e0",
+                        "&:hover": {
+                          border: "1px solid #0073aa",
+                          bgcolor: "rgba(0, 115, 170, 0.04)",
+                        },
+                      }}
+                    >
+                      <span aria-hidden="true">‹</span>
+                    </Button>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      {/* Display page numbers - limit display to keep UI manageable */}
+                      {Math.min(totalPages, MAX_PAGE) <= 10 ? (
+                        // If 10 or fewer pages, show all
+                        [...Array(Math.min(totalPages, MAX_PAGE))].map(
+                          (_, index) => {
+                            const pageNumber = index + 1;
+                            return (
+                              <Button
+                                key={pageNumber}
+                                variant={
+                                  pageNumber === currentPage
+                                    ? "contained"
+                                    : "outlined"
+                                }
+                                onClick={() =>
+                                  handlePageChange(null, pageNumber)
+                                }
+                                color={
+                                  pageNumber === currentPage
+                                    ? "primary"
+                                    : "inherit"
+                                }
+                                size="small"
+                                sx={{
+                                  minWidth: { xs: 32, sm: 40 },
+                                  height: { xs: 32, sm: 40 },
+                                  p: 0,
+                                  bgcolor:
+                                    pageNumber === currentPage
+                                      ? "#0073aa"
+                                      : "transparent",
+                                  border:
+                                    pageNumber === currentPage
+                                      ? "none"
+                                      : "1px solid #e0e0e0",
+                                  "&:hover": {
+                                    bgcolor:
+                                      pageNumber === currentPage
+                                        ? "#005d8c"
+                                        : "rgba(0, 115, 170, 0.04)",
+                                    border:
+                                      pageNumber === currentPage
+                                        ? "none"
+                                        : "1px solid #0073aa",
+                                  },
+                                }}
+                              >
+                                {pageNumber}
+                              </Button>
+                            );
+                          }
+                        )
+                      ) : (
+                        // For extremely large page counts, show reduced navigation
+                        <>
+                          {/* First page */}
+                          <Button
+                            key={1}
+                            variant={
+                              1 === currentPage ? "contained" : "outlined"
+                            }
+                            onClick={() => handlePageChange(null, 1)}
+                            color={1 === currentPage ? "primary" : "inherit"}
+                            size="small"
+                            sx={{
+                              minWidth: { xs: 32, sm: 40 },
+                              height: { xs: 32, sm: 40 },
+                              p: 0,
+                              bgcolor:
+                                1 === currentPage ? "#0073aa" : "transparent",
+                              border:
+                                1 === currentPage
+                                  ? "none"
+                                  : "1px solid #e0e0e0",
+                              "&:hover": {
+                                bgcolor:
+                                  1 === currentPage
+                                    ? "#005d8c"
+                                    : "rgba(0, 115, 170, 0.04)",
+                                border:
+                                  1 === currentPage
+                                    ? "none"
+                                    : "1px solid #0073aa",
+                              },
+                            }}
+                          >
+                            1
+                          </Button>
+
+                          {/* Left ellipsis if needed */}
+                          {currentPage > 3 && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                minWidth: { xs: 32, sm: 40 },
+                                height: { xs: 32, sm: 40 },
+                              }}
+                            >
+                              …
+                            </Box>
+                          )}
+
+                          {/* Pages around current page */}
+                          {[...Array(5)].map((_, index) => {
+                            // Show 2 pages before and 2 pages after current
+                            const offset = index - 2;
+                            const pageNumber = currentPage + offset;
+                            const maxDisplayPage = Math.min(
+                              totalPages,
+                              MAX_PAGE
+                            );
+
+                            // Only show if page is valid and not already shown (first or last)
+                            if (
+                              pageNumber > 1 &&
+                              pageNumber < maxDisplayPage &&
+                              pageNumber > 0
+                            ) {
+                              return (
+                                <Button
+                                  key={pageNumber}
+                                  variant={
+                                    pageNumber === currentPage
+                                      ? "contained"
+                                      : "outlined"
+                                  }
+                                  onClick={() =>
+                                    handlePageChange(null, pageNumber)
+                                  }
+                                  color={
+                                    pageNumber === currentPage
+                                      ? "primary"
+                                      : "inherit"
+                                  }
+                                  size="small"
+                                  sx={{
+                                    minWidth: { xs: 32, sm: 40 },
+                                    height: { xs: 32, sm: 40 },
+                                    p: 0,
+                                    bgcolor:
+                                      pageNumber === currentPage
+                                        ? "#0073aa"
+                                        : "transparent",
+                                    border:
+                                      pageNumber === currentPage
+                                        ? "none"
+                                        : "1px solid #e0e0e0",
+                                    "&:hover": {
+                                      bgcolor:
+                                        pageNumber === currentPage
+                                          ? "#005d8c"
+                                          : "rgba(0, 115, 170, 0.04)",
+                                      border:
+                                        pageNumber === currentPage
+                                          ? "none"
+                                          : "1px solid #0073aa",
+                                    },
+                                  }}
+                                >
+                                  {pageNumber}
+                                </Button>
+                              );
+                            }
+                            return null;
+                          })}
+
+                          {/* Right ellipsis if needed */}
+                          {currentPage < Math.min(totalPages, MAX_PAGE) - 2 && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                minWidth: { xs: 32, sm: 40 },
+                                height: { xs: 32, sm: 40 },
+                              }}
+                            >
+                              …
+                            </Box>
+                          )}
+
+                          {/* Last page */}
+                          {Math.min(totalPages, MAX_PAGE) > 1 && (
+                            <Button
+                              key={Math.min(totalPages, MAX_PAGE)}
+                              variant={
+                                Math.min(totalPages, MAX_PAGE) === currentPage
+                                  ? "contained"
+                                  : "outlined"
+                              }
+                              onClick={() =>
+                                handlePageChange(
+                                  null,
+                                  Math.min(totalPages, MAX_PAGE)
+                                )
+                              }
+                              color={
+                                Math.min(totalPages, MAX_PAGE) === currentPage
+                                  ? "primary"
+                                  : "inherit"
+                              }
+                              size="small"
+                              sx={{
+                                minWidth: { xs: 32, sm: 40 },
+                                height: { xs: 32, sm: 40 },
+                                p: 0,
+                                bgcolor:
+                                  Math.min(totalPages, MAX_PAGE) === currentPage
+                                    ? "#0073aa"
+                                    : "transparent",
+                                border:
+                                  Math.min(totalPages, MAX_PAGE) === currentPage
+                                    ? "none"
+                                    : "1px solid #e0e0e0",
+                                "&:hover": {
+                                  bgcolor:
+                                    Math.min(totalPages, MAX_PAGE) ===
+                                    currentPage
+                                      ? "#005d8c"
+                                      : "rgba(0, 115, 170, 0.04)",
+                                  border:
+                                    Math.min(totalPages, MAX_PAGE) ===
+                                    currentPage
+                                      ? "none"
+                                      : "1px solid #0073aa",
+                                },
+                              }}
+                            >
+                              {Math.min(totalPages, MAX_PAGE)}
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </Box>
+
+                    <Button
+                      disabled={currentPage === Math.min(totalPages, MAX_PAGE)}
+                      onClick={() => handlePageChange(null, currentPage + 1)}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: { xs: 32, sm: 40 },
+                        height: { xs: 32, sm: 40 },
+                        p: 0,
+                        border: "1px solid #e0e0e0",
+                        "&:hover": {
+                          border: "1px solid #0073aa",
+                          bgcolor: "rgba(0, 115, 170, 0.04)",
+                        },
+                      }}
+                    >
+                      <span aria-hidden="true">›</span>
+                    </Button>
+
+                    <Button
+                      disabled={currentPage === Math.min(totalPages, MAX_PAGE)}
+                      onClick={() =>
+                        handlePageChange(null, Math.min(totalPages, MAX_PAGE))
+                      }
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        minWidth: { xs: 32, sm: 40 },
+                        height: { xs: 32, sm: 40 },
+                        p: 0,
+                        border: "1px solid #e0e0e0",
+                        "&:hover": {
+                          border: "1px solid #0073aa",
+                          bgcolor: "rgba(0, 115, 170, 0.04)",
+                        },
+                        display: { xs: "none", sm: "flex" },
+                      }}
+                    >
+                      <span aria-hidden="true">»</span>
+                    </Button>
+                  </Box>
+                </Paper>
+
+                {/* Jump to page component */}
+                {totalPages > 1 && plugins.length > 0 && (
+                  <Paper
+                    component="form"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const pageNum = parseInt(jumpPage, 10);
+                      const maxValidPage = Math.min(totalPages, MAX_PAGE);
+                      if (
+                        !isNaN(pageNum) &&
+                        pageNum >= 1 &&
+                        pageNum <= maxValidPage
+                      ) {
+                        handlePageChange(null, pageNum);
+                        setJumpPage("");
                       }
                     }}
+                    sx={{
+                      mt: 2,
+                      p: 2,
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: "row" },
+                      alignItems: "center",
+                      gap: 2,
+                      borderRadius: "12px",
+                      bgcolor: "#f9fafb",
+                      border: "1px solid #eaecef",
+                    }}
                   >
-                    Show new plugins instead
-                  </Button>
-                )}
-              </Paper>
-          )}
-        </>
-      )}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                        width: { xs: "100%", sm: "auto" },
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        Jump to page:
+                      </Typography>
+                      <TextField
+                        size="small"
+                        value={jumpPage}
+                        onChange={(e) => setJumpPage(e.target.value)}
+                        placeholder={`1-${Math.min(totalPages, MAX_PAGE)}`}
+                        sx={{ width: "100px" }}
+                        inputProps={{
+                          type: "number",
+                          min: 1,
+                          max: Math.min(totalPages, MAX_PAGE),
+                        }}
+                      />
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        size="small"
+                        disabled={!jumpPage}
+                        sx={{
+                          textTransform: "none",
+                          bgcolor: "#0073aa",
+                          "&:hover": {
+                            bgcolor: "#005d8c",
+                          },
+                        }}
+                      >
+                        Go
+                      </Button>
+                    </Box>
 
+                    {totalPages > MAX_PAGE && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ mt: { xs: 1, sm: 0 } }}
+                      >
+                        Note: Displaying up to {MAX_PAGE} pages. Showing
+                        approximately {calculatePerPage(totalPlugins)} plugins
+                        per page.
+                      </Typography>
+                    )}
+                  </Paper>
+                )}
+              </>
+            )}
+            {!loading && plugins.length === 0 && renderEmptyResults()}
+          </>
+        )}
+
+        {/* Plugin count and info box */}
         <Box
           sx={{
             position: "fixed",
             bottom: "20px",
-            right: "20px",
-            padding: "8px 16px",
-            backgroundColor: "rgba(0, 115, 170, 0.9)",
-            color: 'white',
+            right: "90px",
+            padding: "10px 16px",
+            backgroundColor: "rgba(0, 115, 170, 0.95)",
+            color: "white",
             borderRadius: "20px",
-            boxShadow: "0 3px 10px rgba(0,0,0,0.2)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
             backdropFilter: "blur(4px)",
-            zIndex: 10
+            zIndex: 10,
+            display: { xs: "none", md: "block" },
           }}
         >
-          <Typography variant="body2">
-            {`WordPress Plugins: ${totalPlugins > 0 ? totalPlugins.toLocaleString() : 'Loading...'} (${Math.min(totalPages, MAX_PAGE).toLocaleString()} pages)`}
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            {`${
+              totalPlugins > 0 ? totalPlugins.toLocaleString() : "Loading..."
+            } Plugins (${Math.min(
+              totalPages,
+              MAX_PAGE
+            ).toLocaleString()} pages)`}
             {totalPlugins > 0 && (
-              <span style={{ fontSize: '0.8rem', display: 'block' }}>
-                {`${calculatePerPage(totalPlugins, MAX_PAGE, !author && !pluginName && !tagName)} plugins per page`}
+              <span
+                style={{ fontSize: "0.8rem", display: "block", opacity: 0.9 }}
+              >
+                {`${calculatePerPage(
+                  totalPlugins,
+                  MAX_PAGE,
+                  !author && !pluginName && !tagName
+                )} plugins per page`}
               </span>
             )}
-        </Typography>
+          </Typography>
         </Box>
 
-        {/* Scroll to top button */}
+        {/* Scroll to top button with improved styling */}
         {showScrollTop && (
           <Box
             onClick={scrollToTop}
@@ -1790,30 +1877,47 @@ function App() {
               position: "fixed",
               bottom: "80px",
               right: "20px",
-              width: 40,
-              height: 40,
+              width: 48,
+              height: 48,
               backgroundColor: "white",
-              color: '#0073aa',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              color: "#0073aa",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: "50%",
-              cursor: 'pointer',
-              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+              cursor: "pointer",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
               zIndex: 10,
-              border: '1px solid rgba(0, 115, 170, 0.2)',
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                backgroundColor: 'rgba(0, 115, 170, 0.1)',
-                transform: 'translateY(-3px)'
-              }
+              border: "1px solid rgba(0, 115, 170, 0.2)",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor: "rgba(0, 115, 170, 0.05)",
+                transform: "translateY(-3px)",
+                boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+              },
             }}
           >
-            <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>↑</span>
+            <span style={{ fontSize: "1.5rem", fontWeight: "bold" }}>↑</span>
           </Box>
         )}
-    </Container>
-    </>
+      </Container>
+
+      {/* Modern footer */}
+      <Box
+        sx={{
+          mt: 4,
+          pt: 3,
+          pb: 3,
+          borderTop: "1px solid #eaecef",
+          textAlign: "center",
+          color: "text.secondary",
+          fontSize: "0.875rem",
+        }}
+      >
+        © {new Date().getFullYear()} WP Plugin Explorer. Built with React and
+        Material-UI.
+      </Box>
+    </ThemeProvider>
   );
 }
 
