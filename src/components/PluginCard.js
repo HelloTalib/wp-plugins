@@ -145,10 +145,11 @@ function PluginCard({
                 sx={{
                   color: "text.secondary",
                   fontSize: "0.65rem",
-                  fontWeight: 500,
+                  fontWeight: 600,
+                  opacity: 0.8,
                 }}
               >
-                {age === "New" ? "🆕 New" : `${age} old`}
+                {age === "New" ? "🆕 New" : age === "Unknown age" ? "Age unknown" : `${age} old`}
               </Typography>
             </Box>
           </Box>

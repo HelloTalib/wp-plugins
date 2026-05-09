@@ -67,7 +67,10 @@ function MainApp() {
   );
 
   const calculatePluginAge = useCallback((dateString) => {
+    if (!dateString) return "Unknown age";
     const createdDate = new Date(dateString);
+    if (Number.isNaN(createdDate.getTime())) return "Unknown age";
+
     const currentDate = new Date();
     const diffInHours = (currentDate - createdDate) / (1000 * 60 * 60);
     if (diffInHours < 24) return "New";
@@ -78,7 +81,7 @@ function MainApp() {
     const parts = [];
     if (years > 0) parts.push(`${years}y`);
     if (months > 0) parts.push(`${months}m`);
-    if (days > 0) parts.push(`${days}d`);
+    if (days > 0 && years === 0) parts.push(`${days}d`); // Only show days if less than a year
     return parts.join(" ") || "Just created";
   }, []);
 
@@ -118,7 +121,16 @@ function MainApp() {
       const perPage = calculatePerPage(totalPlugins, MAX_PAGE);
 
       try {
-        const params = [`page=${safePage}`, `per_page=${perPage}`];
+        const params = [
+          `page=${safePage}`,
+          `per_page=${perPage}`,
+          "fields[added]=1",
+          "fields[active_installs]=1",
+          "fields[rating]=1",
+          "fields[short_description]=1",
+          "fields[icons]=1",
+          "fields[author_profile]=1",
+        ];
         if (authorName) params.push(`author=${encodeURIComponent(authorName)}`);
         else if (pluginSearchName) params.push(`search=${encodeURIComponent(pluginSearchName)}`);
         else if (tagSearchName) params.push(`tag=${encodeURIComponent(tagSearchName)}`);
