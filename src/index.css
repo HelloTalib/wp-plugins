@@ -6,16 +6,16 @@ html {
 
 body {
   margin: 0;
-  font-family: "Inter", "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #0f172a;
-  background-color: #f8fafc;
+  background-color: #0f0f1a;
   background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99, 102, 241, 0.10), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(139, 92, 246, 0.06), transparent 50%),
-    radial-gradient(ellipse 60% 50% at 0% 100%, rgba(99, 102, 241, 0.04), transparent 50%);
+    radial-gradient(ellipse 100% 80% at 50% -20%, rgba(99, 102, 241, 0.15), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 0%, rgba(139, 92, 246, 0.08), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(59, 130, 246, 0.06), transparent 50%);
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -26,25 +26,25 @@ code {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.2);
+  background: rgba(99, 102, 241, 0.3);
   border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.5);
 }
 
 /* Selection color */
 ::selection {
-  background: rgba(99, 102, 241, 0.18);
-  color: #312e81;
+  background: rgba(99, 102, 241, 0.25);
+  color: #fff;
 }

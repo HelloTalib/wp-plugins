@@ -6,6 +6,7 @@ import {
   CardContent,
   CardMedia,
   Chip,
+  LinearProgress,
   Typography,
 } from "@mui/material";
 
@@ -29,12 +30,11 @@ function PluginCard({
   const rawUpdated = calculateLastUpdated(plugin.last_updated);
   const updatedLabel =
     rawUpdated === "Invalid date"
-      ? "Updated date unavailable"
+      ? "Unknown"
       : rawUpdated === "Just now"
-        ? "Updated just now"
-        : `Updated ${rawUpdated}`;
+        ? "Just now"
+        : rawUpdated;
 
-  const fullStars = Math.floor(displayRating);
   const version = plugin.version ? `v${plugin.version}` : "—";
 
   const decode = (str = "") =>
@@ -44,9 +44,8 @@ function PluginCard({
       .replace(/&amp;/g, "&");
 
   const installsFormatted = formatActiveInstalls(plugin.active_installs);
-
-  // Rating bar percentage
   const ratingPct = Math.min(100, (displayRating / 5) * 100);
+  const age = calculatePluginAge(plugin.added);
 
   return (
     <Card
@@ -55,7 +54,7 @@ function PluginCard({
         display: "flex",
         flexDirection: "column",
         overflow: "visible",
-        animation: "fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both",
+        animation: "fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
         animationDelay: animationDelay ? `${animationDelay}ms` : "0ms",
       }}
     >
@@ -64,37 +63,39 @@ function PluginCard({
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          pt: 3,
-          pb: 2.5,
-          px: 2.5,
-          "&:last-child": { pb: 2.5 },
+          p: 0,
+          "&:last-child": { pb: 0 },
         }}
       >
-        {/* Header: Icon + title + rank/version */}
-        <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start", mb: 2 }}>
+        {/* Top section with icon, title, rank */}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1.5,
+            alignItems: "flex-start",
+            p: 2.5,
+            pb: 2,
+          }}
+        >
+          {/* Plugin icon */}
           <Box
             sx={{
-              width: 56,
-              height: 56,
+              width: 52,
+              height: 52,
               flexShrink: 0,
               borderRadius: 3,
-              border: "1px solid rgba(15, 23, 42, 0.06)",
-              bgcolor: "#f8fafc",
+              background: "linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%)",
+              border: "1px solid rgba(148, 163, 184, 0.08)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               overflow: "hidden",
-              boxShadow: "0 2px 8px rgba(15, 23, 42, 0.06)",
-              transition: "transform 0.3s ease, box-shadow 0.3s ease",
-              "&:hover": {
-                transform: "scale(1.05)",
-                boxShadow: "0 4px 16px rgba(99, 102, 241, 0.15)",
-              },
+              transition: "all 0.3s ease",
             }}
           >
             <CardMedia
               component="img"
-              sx={{ width: 40, height: 40, objectFit: "contain" }}
+              sx={{ width: 36, height: 36, objectFit: "contain" }}
               image={
                 plugin.icons?.["2x"] ||
                 plugin.icons?.["1x"] ||
@@ -105,220 +106,232 @@ function PluginCard({
             />
           </Box>
 
+          {/* Title + version */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Box
+            <Typography
+              variant="subtitle1"
+              component="h2"
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: 1,
+                fontWeight: 700,
+                color: "text.primary",
+                lineHeight: 1.3,
+                letterSpacing: "-0.015em",
+                fontSize: "0.925rem",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
                 mb: 0.5,
               }}
             >
-              <Typography
-                variant="subtitle1"
-                component="h2"
+              {decode(plugin.name)}
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <Chip
+                label={version}
+                size="small"
                 sx={{
+                  height: 20,
                   fontWeight: 700,
-                  color: "text.primary",
-                  lineHeight: 1.3,
-                  letterSpacing: "-0.015em",
-                  flex: 1,
-                  minWidth: 0,
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  fontSize: "0.95rem",
+                  fontSize: "0.65rem",
+                  borderRadius: 1.5,
+                  bgcolor: "rgba(148, 163, 184, 0.08)",
+                  color: "text.secondary",
+                  "& .MuiChip-label": { px: 0.75 },
+                }}
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: "0.65rem",
+                  fontWeight: 500,
                 }}
               >
-                {decode(plugin.name)}
+                {age === "New" ? "🆕 New" : `${age} old`}
               </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5, flexShrink: 0 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 28,
-                    height: 28,
-                    borderRadius: 2,
-                    bgcolor: "rgba(99, 102, 241, 0.06)",
-                    border: "1px solid rgba(99, 102, 241, 0.1)",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontWeight: 800,
-                      color: "primary.main",
-                      fontSize: "0.7rem",
-                      fontFeatureSettings: '"tnum"',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {rank}
-                  </Typography>
-                </Box>
-              </Box>
             </Box>
-            <Chip
-              label={version}
-              size="small"
+          </Box>
+
+          {/* Rank badge */}
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: 2.5,
+              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)",
+            }}
+          >
+            <Typography
               sx={{
-                height: 22,
-                fontWeight: 700,
-                fontSize: "0.68rem",
-                borderRadius: 1.5,
-                bgcolor: "rgba(15, 23, 42, 0.04)",
-                color: "text.secondary",
-                "& .MuiChip-label": { px: 0.8 },
+                fontWeight: 800,
+                color: "#fff",
+                fontSize: "0.75rem",
+                fontFeatureSettings: '"tnum"',
+                lineHeight: 1,
               }}
-            />
+            >
+              #{rank}
+            </Typography>
           </Box>
         </Box>
 
         {/* Description */}
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mb: 2,
-            flex: 1,
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            lineHeight: 1.65,
-            fontSize: "0.84rem",
-            letterSpacing: "0.005em",
-          }}
-        >
-          {decode(plugin.short_description)}
-        </Typography>
+        <Box sx={{ px: 2.5, mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              lineHeight: 1.6,
+              fontSize: "0.82rem",
+            }}
+          >
+            {decode(plugin.short_description)}
+          </Typography>
+        </Box>
 
-        {/* Metrics block */}
+        {/* Stats bar */}
         <Box
           sx={{
-            borderRadius: 3,
-            bgcolor: "rgba(248, 250, 252, 0.95)",
-            border: "1px solid rgba(15, 23, 42, 0.05)",
-            px: 1.5,
-            py: 1.25,
+            mx: 2.5,
             mb: 2,
+            borderRadius: 3,
+            bgcolor: "rgba(15, 23, 42, 0.4)",
+            border: "1px solid rgba(148, 163, 184, 0.06)",
+            overflow: "hidden",
           }}
         >
           {/* Rating row */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 1.5,
+              py: 1,
+              borderBottom: "1px solid rgba(148, 163, 184, 0.06)",
+            }}
+          >
             {displayRating > 0 ? (
               <>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", lineHeight: 1 }} aria-hidden>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Typography
-                        key={i}
-                        component="span"
-                        sx={{
-                          fontSize: "0.85rem",
-                          color: i <= fullStars ? "#f59e0b" : "#e2e8f0",
-                          mr: -0.15,
-                          transition: "color 0.2s",
-                        }}
-                      >
-                        ★
-                      </Typography>
-                    ))}
-                  </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 72 }}>
+                  <Typography sx={{ fontSize: "0.85rem", lineHeight: 1 }}>⭐</Typography>
                   <Typography
                     variant="caption"
-                    sx={{ fontWeight: 800, fontFeatureSettings: '"tnum"', color: "text.primary" }}
+                    sx={{
+                      fontWeight: 800,
+                      fontFeatureSettings: '"tnum"',
+                      color: "#fbbf24",
+                      fontSize: "0.8rem",
+                    }}
                   >
                     {displayRating.toFixed(1)}
                   </Typography>
                 </Box>
-                {/* Rating progress bar */}
-                <Box
+                <LinearProgress
+                  variant="determinate"
+                  value={ratingPct}
                   sx={{
                     flex: 1,
-                    height: 4,
+                    height: 5,
                     borderRadius: 999,
-                    bgcolor: "rgba(15, 23, 42, 0.06)",
-                    overflow: "hidden",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: `${ratingPct}%`,
-                      height: "100%",
+                    bgcolor: "rgba(148, 163, 184, 0.08)",
+                    "& .MuiLinearProgress-bar": {
                       borderRadius: 999,
-                      background: ratingPct >= 80
-                        ? "linear-gradient(90deg, #10b981, #34d399)"
-                        : ratingPct >= 60
-                          ? "linear-gradient(90deg, #f59e0b, #fbbf24)"
-                          : "linear-gradient(90deg, #ef4444, #f87171)",
-                      transition: "width 0.6s ease",
-                    }}
-                  />
-                </Box>
+                      background:
+                        ratingPct >= 80
+                          ? "linear-gradient(90deg, #10b981, #34d399)"
+                          : ratingPct >= 60
+                            ? "linear-gradient(90deg, #f59e0b, #fbbf24)"
+                            : "linear-gradient(90deg, #ef4444, #f87171)",
+                    },
+                  }}
+                />
               </>
             ) : (
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, fontSize: "0.72rem" }}>
                 No ratings yet
               </Typography>
             )}
           </Box>
 
-          {/* Installs + updated row */}
+          {/* Installs + Updated row */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: 1,
-              flexWrap: "wrap",
+              px: 1.5,
+              py: 0.85,
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Typography sx={{ fontSize: "0.8rem" }}>📥</Typography>
+              <Typography sx={{ fontSize: "0.72rem", lineHeight: 1 }}>📥</Typography>
               <Typography
                 variant="caption"
-                sx={{ fontWeight: 700, color: "text.primary", fontFeatureSettings: '"tnum"' }}
+                sx={{
+                  fontWeight: 700,
+                  color: "primary.light",
+                  fontFeatureSettings: '"tnum"',
+                  fontSize: "0.75rem",
+                }}
               >
                 {installsFormatted}
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 500, color: "text.secondary", fontSize: "0.68rem" }}
+              >
                 installs
               </Typography>
             </Box>
 
-            <Chip
-              size="small"
-              label={updatedLabel}
+            <Box
               sx={{
-                fontWeight: 700,
-                height: 24,
-                fontSize: "0.7rem",
-                borderRadius: 2,
-                bgcolor: updatedMeta.bg,
-                color: updatedMeta.color,
-                border: `1px solid ${updatedMeta.color}22`,
-                "& .MuiChip-label": { px: 1 },
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                px: 1,
+                py: 0.3,
+                borderRadius: 1.5,
+                bgcolor: `${updatedMeta.color}18`,
               }}
-            />
+            >
+              <Box
+                sx={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: "50%",
+                  bgcolor: updatedMeta.color,
+                  boxShadow: `0 0 6px ${updatedMeta.color}`,
+                }}
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  color: updatedMeta.color,
+                  fontSize: "0.68rem",
+                  fontFeatureSettings: '"tnum"',
+                }}
+              >
+                {updatedLabel}
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
-        {/* Author + Age row */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 0.75,
-            mb: 1.5,
-          }}
-        >
+        {/* Author */}
+        <Box sx={{ px: 2.5, mb: 1.5 }}>
           <Button
             variant="text"
             size="small"
@@ -327,12 +340,12 @@ function PluginCard({
               p: 0,
               minWidth: 0,
               fontWeight: 700,
-              color: "primary.main",
-              fontSize: "0.8rem",
+              color: "primary.light",
+              fontSize: "0.78rem",
               gap: 0.5,
               "&:hover": {
                 bgcolor: "transparent",
-                color: "primary.dark",
+                color: "primary.main",
               },
             }}
           >
@@ -342,35 +355,23 @@ function PluginCard({
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: 20,
-                height: 20,
-                borderRadius: 999,
-                bgcolor: "primary.light",
+                width: 22,
+                height: 22,
+                borderRadius: 1.5,
+                background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))",
                 fontSize: "0.65rem",
                 fontWeight: 800,
-                color: "primary.dark",
+                color: "primary.light",
               }}
             >
               {username.charAt(0).toUpperCase()}
             </Box>
             @{username}
           </Button>
-          <Chip
-            size="small"
-            label={`Age: ${calculatePluginAge(plugin.added)}`}
-            sx={{
-              height: 22,
-              fontSize: "0.68rem",
-              fontWeight: 600,
-              bgcolor: "rgba(15, 23, 42, 0.03)",
-              color: "text.secondary",
-              "& .MuiChip-label": { px: 0.8 },
-            }}
-          />
         </Box>
 
         {/* Tags */}
-        <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: 2, minHeight: 26 }}>
+        <Box sx={{ px: 2.5, display: "flex", gap: 0.5, flexWrap: "wrap", mb: 2, minHeight: 26 }}>
           {plugin.tags &&
             Object.keys(plugin.tags)
               .slice(0, 3)
@@ -382,44 +383,52 @@ function PluginCard({
                   onClick={() => onTagClick(plugin.tags[tagKey])}
                   sx={{
                     fontWeight: 600,
-                    height: 26,
-                    fontSize: "0.72rem",
-                    borderRadius: 2,
-                    bgcolor: "rgba(99, 102, 241, 0.06)",
-                    color: "primary.dark",
-                    border: "1px solid rgba(99, 102, 241, 0.1)",
-                    transition: "all 0.2s ease",
+                    height: 24,
+                    fontSize: "0.68rem",
+                    borderRadius: 1.5,
+                    bgcolor: "rgba(99, 102, 241, 0.08)",
+                    color: "primary.light",
+                    border: "1px solid rgba(99, 102, 241, 0.12)",
+                    transition: "all 0.25s ease",
                     cursor: "pointer",
                     "&:hover": {
-                      bgcolor: "primary.light",
-                      borderColor: "primary.main",
+                      bgcolor: "rgba(99, 102, 241, 0.18)",
+                      borderColor: "rgba(99, 102, 241, 0.3)",
                       transform: "translateY(-1px)",
+                      boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)",
                     },
                   }}
                 />
               ))}
         </Box>
 
-        {/* CTA */}
-        <Button
-          variant="contained"
-          fullWidth
-          href={`https://wordpress.org/plugins/${plugin.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{
-            mt: "auto",
-            py: 1.25,
-            borderRadius: 3,
-            fontWeight: 700,
-            fontSize: "0.85rem",
-            letterSpacing: "0.01em",
-            gap: 0.75,
-          }}
-        >
-          View on WordPress.org
-          <Box component="span" sx={{ fontSize: "0.9rem", ml: 0.25 }}>→</Box>
-        </Button>
+        {/* CTA Button */}
+        <Box sx={{ px: 2.5, pb: 2.5, mt: "auto" }}>
+          <Button
+            variant="contained"
+            fullWidth
+            href={`https://wordpress.org/plugins/${plugin.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              py: 1.2,
+              borderRadius: 3,
+              fontWeight: 700,
+              fontSize: "0.84rem",
+              letterSpacing: "0.01em",
+              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)",
+              backgroundSize: "200% 200%",
+              transition: "all 0.4s ease",
+              "&:hover": {
+                backgroundPosition: "100% 0",
+                boxShadow: "0 8px 32px rgba(99, 102, 241, 0.35)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          >
+            View on WordPress.org →
+          </Button>
+        </Box>
       </CardContent>
     </Card>
   );

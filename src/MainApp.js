@@ -304,8 +304,8 @@ function MainApp() {
             px: 2,
             textAlign: "center",
             borderTop: "1px solid",
-            borderColor: "rgba(15, 23, 42, 0.06)",
-            bgcolor: "rgba(255,255,255,0.8)",
+            borderColor: "rgba(148, 163, 184, 0.06)",
+            bgcolor: "rgba(26, 26, 46, 0.6)",
             backdropFilter: "blur(12px)",
           }}
         >

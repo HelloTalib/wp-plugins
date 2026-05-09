@@ -7,12 +7,13 @@ import {
   FormControl,
   IconButton,
   InputAdornment,
-  InputLabel,
   MenuItem,
   Paper,
   Select,
   TextField,
   Typography,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 
 function ResultToolbar({
@@ -31,21 +32,15 @@ function ResultToolbar({
   setSortOption,
 }) {
   const getPlaceholder = () => {
-    if (searchType === "author") return "e.g. wpxero";
-    if (searchType === "plugin") return "e.g. cache";
-    return "e.g. seo";
+    if (searchType === "author") return "Search by author (e.g. wpxero)...";
+    if (searchType === "plugin") return "Search by plugin name (e.g. cache)...";
+    return "Search by tag (e.g. seo)...";
   };
 
-  const getLabel = () => {
-    if (searchType === "author") return "Author";
-    if (searchType === "plugin") return "Plugin";
-    return "Tag";
-  };
-
-  const searchTypeIcon = () => {
-    if (searchType === "author") return "👤";
-    if (searchType === "plugin") return "🧩";
-    return "🏷️";
+  const handleSearchTypeChange = (event, newType) => {
+    if (newType !== null) {
+      setSearchType(newType);
+    }
   };
 
   return (
@@ -53,28 +48,27 @@ function ResultToolbar({
       elevation={0}
       component="header"
       sx={{
-        position: "sticky",
-        top: { xs: 0, sm: 12 },
-        zIndex: 24,
-        mb: 3,
-        borderRadius: 5,
-        border: "1px solid",
-        borderColor: "rgba(15, 23, 42, 0.06)",
-        boxShadow: "0 4px 24px rgba(15, 23, 42, 0.06), 0 1px 4px rgba(15, 23, 42, 0.04)",
-        backgroundColor: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(20px) saturate(1.5)",
+        mb: 4,
+        border: "1px solid rgba(148, 163, 184, 0.08)",
+        boxShadow:
+          "0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(148, 163, 184, 0.05)",
+        backgroundColor: "rgba(22, 22, 38, 0.7)",
+        backdropFilter: "blur(24px) saturate(1.8)",
         overflow: "hidden",
       }}
     >
-      {/* Gradient accent bar */}
+      {/* Animated gradient accent */}
       <Box
         sx={{
           height: 3,
-          background: "linear-gradient(90deg, #6366f1 0%, #8b5cf6 40%, #a78bfa 70%, #c4b5fd 100%)",
+          background:
+            "linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa, #c4b5fd, #8b5cf6, #6366f1)",
+          backgroundSize: "300% 100%",
+          animation: "gradientShift 6s ease infinite",
         }}
       />
 
-      <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: { xs: 2, sm: 2 }, pb: { xs: 1.75, sm: 2 } }}>
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
         <Typography
           component="h1"
           sx={{
@@ -89,287 +83,350 @@ function ResultToolbar({
             border: 0,
           }}
         >
-          Select the Best Plugin
+          WP Plugin Explorer
         </Typography>
 
-        {/* Summary + pagination */}
+        {/* ── Top Row: Stats & Sort ── */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: { xs: "stretch", sm: "center" },
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 1.5, sm: 2 },
-            mb: 2,
+            alignItems: "center",
+            mb: 3,
+            gap: 2,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
-            {/* Pulse indicator */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
               sx={{
                 width: 44,
                 height: 44,
                 borderRadius: 3,
-                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                display: { xs: "none", sm: "flex" },
+                background:
+                  "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))",
+                display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                flexShrink: 0,
-                boxShadow: "0 4px 14px rgba(99, 102, 241, 0.3)",
+                border: "1px solid rgba(99, 102, 241, 0.2)",
               }}
             >
-              <Typography sx={{ fontSize: "1.25rem", lineHeight: 1 }}>🔌</Typography>
+              <Typography sx={{ fontSize: "1.4rem" }}>🔌</Typography>
             </Box>
-            <Box sx={{ minWidth: 0 }}>
-              <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, flexWrap: "wrap" }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 800,
-                    letterSpacing: "-0.025em",
-                    lineHeight: 1.25,
-                    fontFeatureSettings: '"tnum"',
-                    background: "linear-gradient(135deg, #0f172a 0%, #334155 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  {totalPlugins.toLocaleString()}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 600,
-                    color: "text.secondary",
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  {totalPlugins === 1 ? "plugin" : "plugins"} found
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", mt: 0.5 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 600,
-                    color: "text.secondary",
-                    fontFeatureSettings: '"tnum"',
-                  }}
-                >
-                  Page {currentPage.toLocaleString()} of {totalPages.toLocaleString()}
-                </Typography>
-                <Chip
-                  size="small"
-                  label="Client-side sort"
-                  sx={{
-                    fontWeight: 600,
-                    height: 22,
-                    fontSize: "0.675rem",
-                    bgcolor: "rgba(99, 102, 241, 0.08)",
-                    color: "primary.dark",
-                    border: "none",
-                    "& .MuiChip-label": { px: 1 },
-                  }}
-                />
-              </Box>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: "flex", gap: 1, justifyContent: { xs: "stretch", sm: "flex-end" } }}>
-            <Button
-              size="small"
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage <= 1}
-              variant="outlined"
-              color="inherit"
-              sx={{
-                flex: { xs: 1, sm: "none" },
-                minWidth: 100,
-                borderRadius: 3,
-                borderColor: "rgba(15, 23, 42, 0.12)",
-                color: "text.secondary",
-                fontWeight: 700,
-                "&:hover": {
-                  borderColor: "primary.main",
-                  color: "primary.main",
-                  bgcolor: "primary.light",
-                },
-              }}
-            >
-              ← Previous
-            </Button>
-            <Button
-              size="small"
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-              variant="contained"
-              sx={{
-                flex: { xs: 1, sm: "none" },
-                minWidth: 100,
-                borderRadius: 3,
-                fontWeight: 700,
-              }}
-            >
-              Next →
-            </Button>
-          </Box>
-        </Box>
-
-        <Divider sx={{ borderColor: "rgba(15, 23, 42, 0.06)", mb: 2 }} />
-
-        {/* Search strip */}
-        <Box
-          component="form"
-          onSubmit={handleSearchSubmit}
-          sx={{
-            borderRadius: 3.5,
-            border: "1px solid rgba(15, 23, 42, 0.06)",
-            bgcolor: "rgba(248, 250, 252, 0.8)",
-            p: { xs: 1.5, sm: 1.75 },
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.5,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 1.25,
-            }}
-          >
-            <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 140 } }}>
-              <InputLabel id="toolbar-search-type-label">Search by</InputLabel>
-              <Select
-                labelId="toolbar-search-type-label"
-                value={searchType}
-                label="Search by"
-                onChange={(e) => setSearchType(e.target.value)}
+            <Box>
+              <Typography
                 sx={{
-                  bgcolor: "background.paper",
-                  borderRadius: 3,
-                  fontWeight: 600,
+                  fontWeight: 900,
+                  fontSize: "1.25rem",
+                  color: "#fff",
+                  lineHeight: 1,
+                  fontFeatureSettings: '"tnum"',
                 }}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Typography sx={{ fontSize: "0.9rem", mr: -0.5 }}>{searchTypeIcon()}</Typography>
-                  </InputAdornment>
-                }
               >
-                <MenuItem value="author">Author</MenuItem>
-                <MenuItem value="plugin">Plugin</MenuItem>
-                <MenuItem value="tag">Tag</MenuItem>
-              </Select>
-            </FormControl>
+                {totalPlugins.toLocaleString()}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 600,
+                  color: "text.secondary",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Plugins Found
+              </Typography>
+            </Box>
+          </Box>
 
-            <TextField
-              size="small"
-              label={getLabel()}
-              placeholder={getPlaceholder()}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Sort Label (Desktop) */}
+            <Typography
+              variant="body2"
               sx={{
-                flex: "1 1 200px",
-                minWidth: { xs: "100%", sm: 200 },
-                "& .MuiOutlinedInput-root": {
-                  bgcolor: "background.paper",
-                  borderRadius: 3,
-                },
-              }}
-              InputProps={{
-                endAdornment: searchInput ? (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => setSearchInput("")}
-                      aria-label="Clear query"
-                      sx={{
-                        color: "text.secondary",
-                        "&:hover": { color: "error.main" },
-                      }}
-                    >
-                      ✕
-                    </IconButton>
-                  </InputAdornment>
-                ) : null,
-              }}
-            />
-
-            <Button
-              type="submit"
-              variant="contained"
-              size="medium"
-              disabled={!searchInput.trim()}
-              sx={{
-                minWidth: { xs: "100%", sm: 120 },
-                borderRadius: 3,
-                height: 42,
                 fontWeight: 700,
-                fontSize: "0.875rem",
-                gap: 0.75,
+                color: "text.secondary",
+                display: { xs: "none", sm: "block" },
               }}
             >
-              🔍 Search
-            </Button>
-
-            <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 170 }, ml: { sm: "auto" } }}>
-              <InputLabel id="toolbar-sort-label">Sort by</InputLabel>
+              Sort By
+            </Typography>
+            <FormControl size="small" sx={{ minWidth: 180 }}>
               <Select
-                labelId="toolbar-sort-label"
                 value={sortOption}
-                label="Sort by"
                 onChange={(e) => setSortOption(e.target.value)}
                 sx={{
-                  bgcolor: "background.paper",
                   borderRadius: 3,
-                  fontWeight: 600,
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  bgcolor: "rgba(30, 30, 50, 0.5)",
                 }}
               >
-                <MenuItem value="installation">📊 Most installs</MenuItem>
-                <MenuItem value="star">⭐ Highest rated</MenuItem>
-                <MenuItem value="updated">🔄 Recently updated</MenuItem>
+                <MenuItem value="installation">📊 Most Installs</MenuItem>
+                <MenuItem value="star">⭐ Highest Rated</MenuItem>
+                <MenuItem value="updated">🔄 Recently Updated</MenuItem>
                 <MenuItem value="new">✨ Newest</MenuItem>
                 <MenuItem value="old">📅 Oldest</MenuItem>
               </Select>
             </FormControl>
           </Box>
+        </Box>
 
-          {/* Active query display */}
+        <Divider sx={{ borderColor: "rgba(148, 163, 184, 0.08)", mb: 3 }} />
+
+        {/* ── Middle Row: Search & Type Toggle ── */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", lg: "row" },
+            gap: 2.5,
+            alignItems: { xs: "stretch", lg: "center" },
+          }}
+        >
+          {/* Segmented Control for Search Type */}
+          <Box sx={{ flexShrink: 0 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                mb: 0.75,
+                fontWeight: 800,
+                color: "text.secondary",
+                ml: 1,
+              }}
+            >
+              SEARCH BY
+            </Typography>
+            <ToggleButtonGroup
+              value={searchType}
+              exclusive
+              onChange={handleSearchTypeChange}
+              size="medium"
+              sx={{
+                bgcolor: "rgba(30, 30, 50, 0.5)",
+                p: 0.5,
+                borderRadius: 4,
+                width: "100%",
+                "& .MuiToggleButton-root": {
+                  flex: 1,
+                  border: "none",
+                  borderRadius: 3,
+                  py: 1,
+                  px: { xs: 1, sm: 2.5 },
+                  fontWeight: 800,
+                  fontSize: "0.8rem",
+                  textTransform: "none",
+                  color: "text.secondary",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  "&.Mui-selected": {
+                    bgcolor: "primary.main",
+                    color: "#fff",
+                    boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)",
+                    "&:hover": { bgcolor: "primary.dark" },
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="author">Author</ToggleButton>
+              <ToggleButton value="plugin">Plugin</ToggleButton>
+              <ToggleButton value="tag">Tag</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* Integrated Search Input */}
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                mb: 0.75,
+                fontWeight: 800,
+                color: "text.secondary",
+                ml: 1,
+              }}
+            >
+              KEYWORD
+            </Typography>
+            <Box
+              component="form"
+              onSubmit={handleSearchSubmit}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+            >
+              <TextField
+                fullWidth
+                placeholder={getPlaceholder()}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 4,
+                    bgcolor: "rgba(30, 30, 50, 0.7)",
+                    height: 52,
+                    pr: 1,
+                    "&.Mui-focused": {
+                      bgcolor: "rgba(30, 30, 50, 0.9)",
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Typography
+                        sx={{ ml: 1, opacity: 0.5, fontSize: "1.2rem" }}
+                      >
+                        🔍
+                      </Typography>
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {searchInput && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setSearchInput("")}
+                          sx={{
+                            mr: 1,
+                            color: "text.secondary",
+                            "&:hover": { color: "error.main" },
+                          }}
+                        >
+                          ✕
+                        </IconButton>
+                      )}
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={!searchInput.trim()}
+                        sx={{
+                          borderRadius: 3,
+                          height: 38,
+                          px: 3,
+                          fontWeight: 800,
+                          fontSize: "0.85rem",
+                          boxShadow: "none",
+                        }}
+                      >
+                        SEARCH
+                      </Button>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+          </Box>
+
+          {/* Mini Pagination */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              flexWrap: "wrap",
-              gap: 1,
-              pt: 1,
-              borderTop: "1px solid rgba(15, 23, 42, 0.06)",
+              gap: 1.5,
+              alignSelf: { xs: "center", lg: "flex-end" },
+              pb: 0.5,
             }}
           >
+            <Box sx={{ textAlign: "right", mr: 1 }}>
+              <Typography
+                sx={{
+                  color: "#fff",
+                  fontWeight: 900,
+                  fontSize: "0.95rem",
+                  lineHeight: 1,
+                }}
+              >
+                {currentPage}{" "}
+                <Box
+                  component="span"
+                  sx={{ color: "text.secondary", fontWeight: 600, mx: 0.5 }}
+                >
+                  /
+                </Box>{" "}
+                {totalPages}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                }}
+              >
+                PAGE
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <IconButton
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage <= 1}
+                sx={{
+                  bgcolor: "rgba(30, 30, 50, 0.6)",
+                  border: "1px solid rgba(148, 163, 184, 0.1)",
+                  borderRadius: 2.5,
+                  p: 1.25,
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    bgcolor: "rgba(99, 102, 241, 0.1)",
+                    borderColor: "primary.main",
+                  },
+                }}
+              >
+                <Typography sx={{ fontSize: "1rem" }}>←</Typography>
+              </IconButton>
+              <IconButton
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages}
+                sx={{
+                  bgcolor: "rgba(30, 30, 50, 0.6)",
+                  border: "1px solid rgba(148, 163, 184, 0.1)",
+                  borderRadius: 2.5,
+                  p: 1.25,
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    bgcolor: "rgba(99, 102, 241, 0.1)",
+                    borderColor: "primary.main",
+                  },
+                }}
+              >
+                <Typography sx={{ fontSize: "1rem" }}>→</Typography>
+              </IconButton>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* ── Bottom Bar: Filter Status ── */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mt: 3,
+            pt: 2,
+            borderTop: "1px solid rgba(148, 163, 184, 0.08)",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Typography
               variant="caption"
               sx={{
-                fontWeight: 800,
-                letterSpacing: "0.08em",
+                fontWeight: 900,
                 color: "text.secondary",
                 textTransform: "uppercase",
-                fontSize: "0.65rem",
+                letterSpacing: "0.1em",
               }}
             >
-              Active Query
+              Filter
             </Typography>
             {activeSearch ? (
               <Chip
-                color="primary"
-                variant="filled"
-                size="small"
                 label={`${activeSearch.type}: ${activeSearch.value}`}
                 onDelete={clearSearch}
                 sx={{
-                  fontWeight: 700,
+                  fontWeight: 800,
                   borderRadius: 2,
                   height: 28,
-                  background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                  fontSize: "0.75rem",
+                  background:
+                    "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                  color: "#fff",
                   "& .MuiChip-deleteIcon": {
                     color: "rgba(255,255,255,0.7)",
                     "&:hover": { color: "#fff" },
@@ -378,18 +435,26 @@ function ResultToolbar({
               />
             ) : (
               <Chip
-                label="Latest from directory"
+                label="Latest Directory"
                 size="small"
                 sx={{
-                  fontWeight: 600,
+                  fontWeight: 700,
                   borderRadius: 2,
-                  height: 28,
-                  bgcolor: "rgba(99, 102, 241, 0.06)",
-                  color: "primary.dark",
-                  border: "1px solid rgba(99, 102, 241, 0.12)",
+                  bgcolor: "rgba(148, 163, 184, 0.1)",
+                  color: "text.secondary",
+                  border: "1px solid rgba(148, 163, 184, 0.1)",
                 }}
               />
             )}
+          </Box>
+
+          <Box sx={{ display: { xs: "none", md: "block" } }}>
+            <Typography
+              variant="caption"
+              sx={{ fontWeight: 600, color: "text.secondary" }}
+            >
+              Real-time data from WordPress.org API
+            </Typography>
           </Box>
         </Box>
       </Box>
