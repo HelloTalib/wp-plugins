@@ -18,23 +18,54 @@ function PaginationBar({
       elevation={0}
       sx={{
         mt: 4,
-        p: { xs: 2, md: 2.5 },
-        borderRadius: 4,
-        border: "1px solid rgba(30, 41, 59, 0.09)",
-        boxShadow: "0 2px 12px rgba(15, 23, 42, 0.06)",
-        bgcolor: "rgba(255,255,255,0.96)",
+        p: { xs: 2.5, md: 3 },
+        borderRadius: 5,
+        border: "1px solid rgba(15, 23, 42, 0.06)",
+        boxShadow: "0 4px 24px rgba(15, 23, 42, 0.04)",
+        bgcolor: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(12px)",
         display: "grid",
-        gap: 2,
+        gap: 2.5,
+        animation: "fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both",
       }}
     >
+      {/* Item range display */}
       <Box sx={{ textAlign: "center" }}>
-        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-          Showing <strong>{startItem}</strong> – <strong>{endItem}</strong> of{" "}
-          <strong>{totalPlugins.toLocaleString()}</strong>
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+            color: "text.secondary",
+            fontFeatureSettings: '"tnum"',
+          }}
+        >
+          Showing{" "}
+          <Box component="strong" sx={{ color: "text.primary", fontWeight: 800 }}>
+            {startItem.toLocaleString()}
+          </Box>
+          {" – "}
+          <Box component="strong" sx={{ color: "text.primary", fontWeight: 800 }}>
+            {endItem.toLocaleString()}
+          </Box>
+          {" of "}
+          <Box component="strong" sx={{ color: "primary.main", fontWeight: 800 }}>
+            {totalPlugins.toLocaleString()}
+          </Box>
+          {" plugins"}
         </Typography>
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "center", overflowX: "auto", pb: 0.5 }}>
+      {/* Pagination component */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          overflowX: "auto",
+          pb: 0.5,
+          "&::-webkit-scrollbar": { height: 4 },
+          "&::-webkit-scrollbar-thumb": { borderRadius: 99, bgcolor: "rgba(99,102,241,0.2)" },
+        }}
+      >
         <Pagination
           color="primary"
           count={totalPages}
@@ -48,25 +79,47 @@ function PaginationBar({
           sx={{
             "& .MuiPaginationItem-root": {
               fontWeight: 700,
-              borderRadius: 2,
+              borderRadius: 2.5,
+              minWidth: 38,
+              height: 38,
+              transition: "all 0.25s ease",
+              "&:hover": {
+                bgcolor: "primary.light",
+                color: "primary.dark",
+              },
             },
             "& .MuiPaginationItem-root.Mui-selected": {
-              boxShadow: "0 6px 16px rgba(34, 113, 177, 0.25)",
+              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              boxShadow: "0 4px 14px rgba(99, 102, 241, 0.3)",
+              color: "#fff",
+              "&:hover": {
+                background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+              },
             },
           }}
         />
       </Box>
 
+      {/* Jump to page */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexWrap: "wrap",
-          gap: 1,
+          gap: 1.25,
+          pt: 1.5,
+          borderTop: "1px solid rgba(15, 23, 42, 0.06)",
         }}
       >
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+          }}
+        >
           Jump to page
         </Typography>
         <Box
@@ -88,10 +141,20 @@ function PaginationBar({
             onChange={(e) => setJumpPage(e.target.value)}
             placeholder={`1–${totalPages}`}
             inputProps={{ min: 1, max: totalPages }}
-            sx={{ width: 112 }}
+            sx={{
+              width: 112,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2.5,
+              },
+            }}
           />
-          <Button type="submit" variant="contained" disabled={!jumpPage}>
-            Go
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={!jumpPage}
+            sx={{ borderRadius: 2.5, minHeight: 40 }}
+          >
+            Go →
           </Button>
         </Box>
       </Box>

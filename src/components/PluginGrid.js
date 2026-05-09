@@ -14,7 +14,7 @@ function PluginGrid({
   onTagClick,
 }) {
   return (
-    <Grid container spacing={{ xs: 2.25, sm: 2.5, md: 3 }}>
+    <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
       {plugins.map((plugin, index) => (
         <Grid item key={plugin.slug} xs={12} sm={6} md={4} xl={3}>
           <PluginCard
@@ -26,6 +26,7 @@ function PluginGrid({
             getUpdatedMeta={getUpdatedMeta}
             onAuthorClick={onAuthorClick}
             onTagClick={onTagClick}
+            animationDelay={Math.min(index * 50, 400)}
           />
         </Grid>
       ))}

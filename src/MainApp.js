@@ -56,12 +56,12 @@ function MainApp() {
   const getUpdatedMeta = useCallback(
     (dateString) => {
       const updatedDate = parseWpDate(dateString);
-      if (!updatedDate) return { days: Infinity, color: "#b91c1c", bg: "rgba(248,113,113,0.2)" };
+      if (!updatedDate) return { days: Infinity, color: "#ef4444", bg: "rgba(239,68,68,0.1)" };
       const now = new Date();
       const days = Math.max(0, Math.floor((now - updatedDate) / (1000 * 60 * 60 * 24)));
-      if (days <= 14) return { days, color: "#15803d", bg: "rgba(34,197,94,0.16)" };
-      if (days <= 30) return { days, color: "#a16207", bg: "rgba(250,204,21,0.24)" };
-      return { days, color: "#b91c1c", bg: "rgba(248,113,113,0.2)" };
+      if (days <= 14) return { days, color: "#059669", bg: "rgba(16,185,129,0.1)" };
+      if (days <= 30) return { days, color: "#d97706", bg: "rgba(245,158,11,0.1)" };
+      return { days, color: "#ef4444", bg: "rgba(239,68,68,0.1)" };
     },
     [parseWpDate]
   );
@@ -296,20 +296,47 @@ function MainApp() {
         )}
         </Container>
 
+        {/* Footer */}
         <Box
           component="footer"
           sx={{
-            py: 2.5,
+            py: 3,
             px: 2,
             textAlign: "center",
             borderTop: "1px solid",
-            borderColor: "divider",
-            bgcolor: "rgba(255,255,255,0.72)",
-            backdropFilter: "blur(10px)",
+            borderColor: "rgba(15, 23, 42, 0.06)",
+            bgcolor: "rgba(255,255,255,0.8)",
+            backdropFilter: "blur(12px)",
           }}
         >
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-            WP Plugin Explorer · Data from WordPress.org · © {new Date().getFullYear()}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              mb: 0.5,
+            }}
+          >
+            <Box
+              sx={{
+                width: 28,
+                height: 28,
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography sx={{ fontSize: "0.85rem", lineHeight: 1 }}>🔌</Typography>
+            </Box>
+            <Typography variant="body2" sx={{ fontWeight: 700, color: "text.primary", letterSpacing: "-0.01em" }}>
+              WP Plugin Explorer
+            </Typography>
+          </Box>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+            Data from WordPress.org · Built with React & MUI · © {new Date().getFullYear()}
           </Typography>
         </Box>
       </Box>
