@@ -84,8 +84,8 @@ function PluginCard({
               height: 52,
               flexShrink: 0,
               borderRadius: 3,
-              background: "linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%)",
-              border: "1px solid rgba(148, 163, 184, 0.08)",
+              background: "linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%)",
+              border: "1px solid rgba(15, 23, 42, 0.05)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -112,11 +112,11 @@ function PluginCard({
               variant="subtitle1"
               component="h2"
               sx={{
-                fontWeight: 700,
+                fontWeight: 800,
                 color: "text.primary",
                 lineHeight: 1.3,
-                letterSpacing: "-0.015em",
-                fontSize: "0.925rem",
+                letterSpacing: "-0.02em",
+                fontSize: "0.95rem",
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
@@ -132,11 +132,12 @@ function PluginCard({
                 size="small"
                 sx={{
                   height: 20,
-                  fontWeight: 700,
+                  fontWeight: 800,
                   fontSize: "0.65rem",
                   borderRadius: 1.5,
-                  bgcolor: "rgba(148, 163, 184, 0.08)",
+                  bgcolor: "rgba(15, 23, 42, 0.04)",
                   color: "text.secondary",
+                  border: "1px solid rgba(15, 23, 42, 0.02)",
                   "& .MuiChip-label": { px: 0.75 },
                 }}
               />
@@ -145,8 +146,8 @@ function PluginCard({
                 sx={{
                   color: "text.secondary",
                   fontSize: "0.65rem",
-                  fontWeight: 600,
-                  opacity: 0.8,
+                  fontWeight: 700,
+                  opacity: 0.7,
                 }}
               >
                 {age === "New" ? "🆕 New" : age === "Unknown age" ? "Age unknown" : `${age} old`}
@@ -165,12 +166,12 @@ function PluginCard({
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
-              boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)",
+              boxShadow: "0 4px 12px rgba(99, 102, 241, 0.25)",
             }}
           >
             <Typography
               sx={{
-                fontWeight: 800,
+                fontWeight: 900,
                 color: "#fff",
                 fontSize: "0.75rem",
                 fontFeatureSettings: '"tnum"',
@@ -194,6 +195,7 @@ function PluginCard({
               overflow: "hidden",
               lineHeight: 1.6,
               fontSize: "0.82rem",
+              fontWeight: 500,
             }}
           >
             {decode(plugin.short_description)}
@@ -206,8 +208,8 @@ function PluginCard({
             mx: 2.5,
             mb: 2,
             borderRadius: 3,
-            bgcolor: "rgba(15, 23, 42, 0.4)",
-            border: "1px solid rgba(148, 163, 184, 0.06)",
+            bgcolor: "rgba(15, 23, 42, 0.02)",
+            border: "1px solid rgba(15, 23, 42, 0.04)",
             overflow: "hidden",
           }}
         >
@@ -219,7 +221,7 @@ function PluginCard({
               gap: 1,
               px: 1.5,
               py: 1,
-              borderBottom: "1px solid rgba(148, 163, 184, 0.06)",
+              borderBottom: "1px solid rgba(15, 23, 42, 0.04)",
             }}
           >
             {displayRating > 0 ? (
@@ -231,7 +233,7 @@ function PluginCard({
                     sx={{
                       fontWeight: 800,
                       fontFeatureSettings: '"tnum"',
-                      color: "#fbbf24",
+                      color: "#d97706",
                       fontSize: "0.8rem",
                     }}
                   >
@@ -245,7 +247,7 @@ function PluginCard({
                     flex: 1,
                     height: 5,
                     borderRadius: 999,
-                    bgcolor: "rgba(148, 163, 184, 0.08)",
+                    bgcolor: "rgba(15, 23, 42, 0.06)",
                     "& .MuiLinearProgress-bar": {
                       borderRadius: 999,
                       background:
@@ -259,7 +261,7 @@ function PluginCard({
                 />
               </>
             ) : (
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, fontSize: "0.72rem" }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.72rem", py: 0.2 }}>
                 No ratings yet
               </Typography>
             )}
@@ -280,8 +282,8 @@ function PluginCard({
               <Typography
                 variant="caption"
                 sx={{
-                  fontWeight: 700,
-                  color: "primary.light",
+                  fontWeight: 800,
+                  color: "primary.main",
                   fontFeatureSettings: '"tnum"',
                   fontSize: "0.75rem",
                 }}
@@ -290,7 +292,7 @@ function PluginCard({
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ fontWeight: 500, color: "text.secondary", fontSize: "0.68rem" }}
+                sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.68rem" }}
               >
                 installs
               </Typography>
@@ -304,7 +306,7 @@ function PluginCard({
                 px: 1,
                 py: 0.3,
                 borderRadius: 1.5,
-                bgcolor: `${updatedMeta.color}18`,
+                bgcolor: `${updatedMeta.color}12`,
               }}
             >
               <Box
@@ -313,13 +315,12 @@ function PluginCard({
                   height: 5,
                   borderRadius: "50%",
                   bgcolor: updatedMeta.color,
-                  boxShadow: `0 0 6px ${updatedMeta.color}`,
                 }}
               />
               <Typography
                 variant="caption"
                 sx={{
-                  fontWeight: 700,
+                  fontWeight: 800,
                   color: updatedMeta.color,
                   fontSize: "0.68rem",
                   fontFeatureSettings: '"tnum"',
@@ -340,13 +341,13 @@ function PluginCard({
             sx={{
               p: 0,
               minWidth: 0,
-              fontWeight: 700,
-              color: "primary.light",
+              fontWeight: 800,
+              color: "primary.main",
               fontSize: "0.78rem",
               gap: 0.5,
               "&:hover": {
                 bgcolor: "transparent",
-                color: "primary.main",
+                color: "primary.dark",
               },
             }}
           >
@@ -359,10 +360,11 @@ function PluginCard({
                 width: 22,
                 height: 22,
                 borderRadius: 1.5,
-                background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))",
+                background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08))",
                 fontSize: "0.65rem",
-                fontWeight: 800,
-                color: "primary.light",
+                fontWeight: 900,
+                color: "primary.main",
+                border: "1px solid rgba(99, 102, 241, 0.1)",
               }}
             >
               {username.charAt(0).toUpperCase()}
@@ -383,25 +385,25 @@ function PluginCard({
                   label={plugin.tags[tagKey]}
                   onClick={() => onTagClick(plugin.tags[tagKey])}
                   sx={{
-                    fontWeight: 600,
+                    fontWeight: 700,
                     height: 24,
                     fontSize: "0.68rem",
                     borderRadius: 1.5,
-                    bgcolor: "rgba(99, 102, 241, 0.08)",
-                    color: "primary.light",
-                    border: "1px solid rgba(99, 102, 241, 0.12)",
+                    bgcolor: "rgba(99, 102, 241, 0.05)",
+                    color: "primary.main",
+                    border: "1px solid rgba(99, 102, 241, 0.08)",
                     transition: "all 0.25s ease",
                     cursor: "pointer",
                     "&:hover": {
-                      bgcolor: "rgba(99, 102, 241, 0.18)",
-                      borderColor: "rgba(99, 102, 241, 0.3)",
+                      bgcolor: "rgba(99, 102, 241, 0.1)",
+                      borderColor: "rgba(99, 102, 241, 0.2)",
                       transform: "translateY(-1px)",
-                      boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)",
                     },
                   }}
                 />
               ))}
         </Box>
+
 
         {/* CTA Button */}
         <Box sx={{ px: 2.5, pb: 2.5, mt: "auto" }}>

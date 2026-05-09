@@ -49,11 +49,11 @@ function ResultToolbar({
       component="header"
       sx={{
         mb: 4,
-        border: "1px solid rgba(148, 163, 184, 0.08)",
+        borderRadius: 5,
+        border: "1px solid rgba(15, 23, 42, 0.05)",
         boxShadow:
-          "0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(148, 163, 184, 0.05)",
-        backgroundColor: "rgba(22, 22, 38, 0.7)",
-        backdropFilter: "blur(24px) saturate(1.8)",
+          "0 12px 40px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.02)",
+        backgroundColor: "#ffffff",
         overflow: "hidden",
       }}
     >
@@ -103,11 +103,11 @@ function ResultToolbar({
                 height: 44,
                 borderRadius: 3,
                 background:
-                  "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))",
+                  "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                border: "1px solid rgba(99, 102, 241, 0.2)",
+                border: "1px solid rgba(99, 102, 241, 0.1)",
               }}
             >
               <Typography sx={{ fontSize: "1.4rem" }}>🔌</Typography>
@@ -117,7 +117,7 @@ function ResultToolbar({
                 sx={{
                   fontWeight: 900,
                   fontSize: "1.25rem",
-                  color: "#fff",
+                  color: "text.primary",
                   lineHeight: 1,
                   fontFeatureSettings: '"tnum"',
                 }}
@@ -127,7 +127,7 @@ function ResultToolbar({
               <Typography
                 variant="caption"
                 sx={{
-                  fontWeight: 600,
+                  fontWeight: 700,
                   color: "text.secondary",
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
@@ -158,7 +158,10 @@ function ResultToolbar({
                   borderRadius: 3,
                   fontWeight: 700,
                   fontSize: "0.85rem",
-                  bgcolor: "rgba(30, 30, 50, 0.5)",
+                  bgcolor: "rgba(15, 23, 42, 0.02)",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "1px solid rgba(15, 23, 42, 0.05)",
+                  },
                 }}
               >
                 <MenuItem value="installation">📊 Most Installs</MenuItem>
@@ -171,7 +174,7 @@ function ResultToolbar({
           </Box>
         </Box>
 
-        <Divider sx={{ borderColor: "rgba(148, 163, 184, 0.08)", mb: 3 }} />
+        <Divider sx={{ borderColor: "rgba(15, 23, 42, 0.04)", mb: 3 }} />
 
         {/* ── Middle Row: Search & Type Toggle ── */}
         <Box
@@ -202,7 +205,7 @@ function ResultToolbar({
               onChange={handleSearchTypeChange}
               size="medium"
               sx={{
-                bgcolor: "rgba(30, 30, 50, 0.5)",
+                bgcolor: "rgba(15, 23, 42, 0.03)",
                 p: 0.5,
                 borderRadius: 4,
                 width: "100%",
@@ -218,10 +221,9 @@ function ResultToolbar({
                   color: "text.secondary",
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   "&.Mui-selected": {
-                    bgcolor: "primary.main",
-                    color: "#fff",
-                    boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)",
-                    "&:hover": { bgcolor: "primary.dark" },
+                    bgcolor: "#ffffff",
+                    color: "primary.main",
+                    boxShadow: "0 2px 8px rgba(15, 23, 42, 0.08)",
                   },
                 },
               }}
@@ -259,19 +261,21 @@ function ResultToolbar({
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 4,
-                    bgcolor: "rgba(30, 30, 50, 0.7)",
+                    bgcolor: "rgba(15, 23, 42, 0.02)",
                     height: 52,
                     pr: 1,
-                    "&.Mui-focused": {
-                      bgcolor: "rgba(30, 30, 50, 0.9)",
+                    "& fieldset": { borderColor: "rgba(15, 23, 42, 0.06)" },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(99, 102, 241, 0.3)",
                     },
+                    "&.Mui-focused fieldset": { borderColor: "#6366f1" },
                   },
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
                       <Typography
-                        sx={{ ml: 1, opacity: 0.5, fontSize: "1.2rem" }}
+                        sx={{ ml: 1, opacity: 0.4, fontSize: "1.2rem" }}
                       >
                         🔍
                       </Typography>
@@ -300,9 +304,6 @@ function ResultToolbar({
                           borderRadius: 3,
                           height: 38,
                           px: 3,
-                          fontWeight: 800,
-                          fontSize: "0.85rem",
-                          boxShadow: "none",
                         }}
                       >
                         SEARCH
@@ -327,7 +328,7 @@ function ResultToolbar({
             <Box sx={{ textAlign: "right", mr: 1 }}>
               <Typography
                 sx={{
-                  color: "#fff",
+                  color: "text.primary",
                   fontWeight: 900,
                   fontSize: "0.95rem",
                   lineHeight: 1,
@@ -358,35 +359,37 @@ function ResultToolbar({
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage <= 1}
                 sx={{
-                  bgcolor: "rgba(30, 30, 50, 0.6)",
-                  border: "1px solid rgba(148, 163, 184, 0.1)",
+                  bgcolor: "#ffffff",
+                  border: "1px solid rgba(15, 23, 42, 0.08)",
                   borderRadius: 2.5,
                   p: 1.25,
-                  transition: "all 0.2s ease",
                   "&:hover": {
-                    bgcolor: "rgba(99, 102, 241, 0.1)",
+                    bgcolor: "rgba(99, 102, 241, 0.05)",
                     borderColor: "primary.main",
                   },
                 }}
               >
-                <Typography sx={{ fontSize: "1rem" }}>←</Typography>
+                <Typography sx={{ fontSize: "1rem", color: "text.secondary" }}>
+                  ←
+                </Typography>
               </IconButton>
               <IconButton
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage >= totalPages}
                 sx={{
-                  bgcolor: "rgba(30, 30, 50, 0.6)",
-                  border: "1px solid rgba(148, 163, 184, 0.1)",
+                  bgcolor: "#ffffff",
+                  border: "1px solid rgba(15, 23, 42, 0.08)",
                   borderRadius: 2.5,
                   p: 1.25,
-                  transition: "all 0.2s ease",
                   "&:hover": {
-                    bgcolor: "rgba(99, 102, 241, 0.1)",
+                    bgcolor: "rgba(99, 102, 241, 0.05)",
                     borderColor: "primary.main",
                   },
                 }}
               >
-                <Typography sx={{ fontSize: "1rem" }}>→</Typography>
+                <Typography sx={{ fontSize: "1rem", color: "text.secondary" }}>
+                  →
+                </Typography>
               </IconButton>
             </Box>
           </Box>
@@ -400,7 +403,7 @@ function ResultToolbar({
             justifyContent: "space-between",
             mt: 3,
             pt: 2,
-            borderTop: "1px solid rgba(148, 163, 184, 0.08)",
+            borderTop: "1px solid rgba(15, 23, 42, 0.04)",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -427,10 +430,6 @@ function ResultToolbar({
                   background:
                     "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
                   color: "#fff",
-                  "& .MuiChip-deleteIcon": {
-                    color: "rgba(255,255,255,0.7)",
-                    "&:hover": { color: "#fff" },
-                  },
                 }}
               />
             ) : (
@@ -440,9 +439,9 @@ function ResultToolbar({
                 sx={{
                   fontWeight: 700,
                   borderRadius: 2,
-                  bgcolor: "rgba(148, 163, 184, 0.1)",
+                  bgcolor: "rgba(15, 23, 42, 0.04)",
                   color: "text.secondary",
-                  border: "1px solid rgba(148, 163, 184, 0.1)",
+                  border: "1px solid rgba(15, 23, 42, 0.05)",
                 }}
               />
             )}

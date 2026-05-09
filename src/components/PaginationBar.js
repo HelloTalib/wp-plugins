@@ -19,11 +19,10 @@ function PaginationBar({
       sx={{
         mt: 4,
         p: { xs: 2.5, md: 3 },
-        borderRadius: 4,
-        border: "1px solid rgba(148, 163, 184, 0.06)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-        bgcolor: "rgba(26, 26, 46, 0.85)",
-        backdropFilter: "blur(20px)",
+        borderRadius: 5,
+        border: "1px solid rgba(15, 23, 42, 0.05)",
+        boxShadow: "0 10px 30px rgba(15, 23, 42, 0.05)",
+        bgcolor: "#ffffff",
         display: "grid",
         gap: 2.5,
         animation: "fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both",
@@ -33,24 +32,25 @@ function PaginationBar({
         <Typography
           variant="body2"
           sx={{
-            fontWeight: 500,
+            fontWeight: 600,
             color: "text.secondary",
             fontFeatureSettings: '"tnum"',
-            fontSize: "0.84rem",
+            fontSize: "0.85rem",
           }}
         >
           Showing{" "}
-          <Box component="span" sx={{ color: "#fff", fontWeight: 700 }}>
+          <Box component="span" sx={{ color: "text.primary", fontWeight: 800 }}>
             {startItem.toLocaleString()}
           </Box>
           {" – "}
-          <Box component="span" sx={{ color: "#fff", fontWeight: 700 }}>
+          <Box component="span" sx={{ color: "text.primary", fontWeight: 800 }}>
             {endItem.toLocaleString()}
           </Box>
           {" of "}
-          <Box component="span" sx={{ color: "primary.light", fontWeight: 700 }}>
+          <Box component="span" sx={{ color: "primary.main", fontWeight: 800 }}>
             {totalPlugins.toLocaleString()}
-          </Box>
+          </Box>{" "}
+          plugins
         </Typography>
       </Box>
 
@@ -58,41 +58,36 @@ function PaginationBar({
         sx={{
           display: "flex",
           justifyContent: "center",
-          overflowX: "auto",
-          pb: 0.5,
-          "&::-webkit-scrollbar": { height: 3 },
-          "&::-webkit-scrollbar-thumb": { borderRadius: 99, bgcolor: "rgba(99,102,241,0.3)" },
+          my: 1,
         }}
       >
         <Pagination
-          color="primary"
           count={totalPages}
           page={currentPage}
-          onChange={(event, value) => onPageChange(value)}
+          onChange={(e, p) => onPageChange(p)}
+          size="large"
           siblingCount={1}
           boundaryCount={1}
-          size="medium"
-          showFirstButton
-          showLastButton
           sx={{
             "& .MuiPaginationItem-root": {
-              fontWeight: 700,
-              borderRadius: 2,
-              minWidth: 36,
-              height: 36,
+              fontWeight: 800,
+              borderRadius: 3,
+              height: 44,
+              minWidth: 44,
+              fontSize: "0.85rem",
               color: "text.secondary",
-              transition: "all 0.3s ease",
+              transition: "all 0.2s ease",
               "&:hover": {
-                bgcolor: "rgba(99, 102, 241, 0.12)",
-                color: "primary.light",
+                bgcolor: "rgba(99, 102, 241, 0.05)",
+                color: "primary.main",
               },
-            },
-            "& .MuiPaginationItem-root.Mui-selected": {
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-              boxShadow: "0 4px 16px rgba(99, 102, 241, 0.35)",
-              color: "#fff",
-              "&:hover": {
-                background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+              "&.Mui-selected": {
+                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                color: "#ffffff",
+                boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                },
               },
             },
           }}
@@ -105,14 +100,14 @@ function PaginationBar({
           alignItems: "center",
           justifyContent: "center",
           flexWrap: "wrap",
-          gap: 1,
-          pt: 1.5,
-          borderTop: "1px solid rgba(148, 163, 184, 0.06)",
+          gap: 1.5,
+          pt: 2.5,
+          borderTop: "1px solid rgba(15, 23, 42, 0.04)",
         }}
       >
         <Typography
           variant="caption"
-          sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.75rem" }}
+          sx={{ fontWeight: 800, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}
         >
           Jump to page
         </Typography>
@@ -126,7 +121,7 @@ function PaginationBar({
               setJumpPage("");
             }
           }}
-          sx={{ display: "flex", alignItems: "center", gap: 0.75 }}
+          sx={{ display: "flex", alignItems: "center", gap: 1 }}
         >
           <TextField
             size="small"
@@ -135,16 +130,23 @@ function PaginationBar({
             onChange={(e) => setJumpPage(e.target.value)}
             placeholder={`1–${totalPages}`}
             inputProps={{ min: 1, max: totalPages }}
-            sx={{ width: 100, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            sx={{ 
+              width: 100, 
+              "& .MuiOutlinedInput-root": { 
+                borderRadius: 2.5,
+                bgcolor: "rgba(15, 23, 42, 0.02)",
+                "& fieldset": { borderColor: "rgba(15, 23, 42, 0.08)" }
+              } 
+            }}
           />
           <Button
             type="submit"
             variant="contained"
             size="small"
             disabled={!jumpPage}
-            sx={{ borderRadius: 2, minHeight: 36 }}
+            sx={{ borderRadius: 2.5, height: 40, px: 3, boxShadow: "none" }}
           >
-            Go
+            GO
           </Button>
         </Box>
       </Box>

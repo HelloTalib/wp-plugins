@@ -301,7 +301,7 @@ function MainApp() {
                     ? `No results for ${activeSearch.type.toLowerCase()} "${activeSearch.value}". Adjust the query above.`
                     : "Use the bar above to search by author, plugin name, or tag."
                 }
-                onReset={clearSearch}
+                onClear={clearSearch}
               />
             )}
           </Box>
@@ -312,13 +312,12 @@ function MainApp() {
         <Box
           component="footer"
           sx={{
-            py: 3,
+            py: 4,
             px: 2,
             textAlign: "center",
             borderTop: "1px solid",
-            borderColor: "rgba(148, 163, 184, 0.06)",
-            bgcolor: "rgba(26, 26, 46, 0.6)",
-            backdropFilter: "blur(12px)",
+            borderColor: "rgba(15, 23, 42, 0.04)",
+            bgcolor: "#ffffff",
           }}
         >
           <Box
