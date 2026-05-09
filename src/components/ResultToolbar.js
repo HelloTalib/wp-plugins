@@ -49,7 +49,6 @@ function ResultToolbar({
       component="header"
       sx={{
         mb: 4,
-        borderRadius: 5,
         border: "1px solid rgba(15, 23, 42, 0.05)",
         boxShadow:
           "0 12px 40px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.02)",
@@ -85,97 +84,6 @@ function ResultToolbar({
         >
           WP Plugin Explorer
         </Typography>
-
-        {/* ── Top Row: Stats & Sort ── */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-            gap: 2,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: 3,
-                background:
-                  "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1px solid rgba(99, 102, 241, 0.1)",
-              }}
-            >
-              <Typography sx={{ fontSize: "1.4rem" }}>🔌</Typography>
-            </Box>
-            <Box>
-              <Typography
-                sx={{
-                  fontWeight: 900,
-                  fontSize: "1.25rem",
-                  color: "text.primary",
-                  lineHeight: 1,
-                  fontFeatureSettings: '"tnum"',
-                }}
-              >
-                {totalPlugins.toLocaleString()}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 700,
-                  color: "text.secondary",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Plugins Found
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* Sort Label (Desktop) */}
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 700,
-                color: "text.secondary",
-                display: { xs: "none", sm: "block" },
-              }}
-            >
-              Sort By
-            </Typography>
-            <FormControl size="small" sx={{ minWidth: 180 }}>
-              <Select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                sx={{
-                  borderRadius: 3,
-                  fontWeight: 700,
-                  fontSize: "0.85rem",
-                  bgcolor: "rgba(15, 23, 42, 0.02)",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    border: "1px solid rgba(15, 23, 42, 0.05)",
-                  },
-                }}
-              >
-                <MenuItem value="installation">📊 Most Installs</MenuItem>
-                <MenuItem value="star">⭐ Highest Rated</MenuItem>
-                <MenuItem value="updated">🔄 Recently Updated</MenuItem>
-                <MenuItem value="new">✨ Newest</MenuItem>
-                <MenuItem value="old">📅 Oldest</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Box>
-
-        <Divider sx={{ borderColor: "rgba(15, 23, 42, 0.04)", mb: 3 }} />
-
         {/* ── Middle Row: Search & Type Toggle ── */}
         <Box
           sx={{
@@ -406,6 +314,47 @@ function ResultToolbar({
             borderTop: "1px solid rgba(15, 23, 42, 0.04)",
           }}
         >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 3,
+                background:
+                  "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "1px solid rgba(99, 102, 241, 0.1)",
+              }}
+            >
+              <Typography sx={{ fontSize: "1.4rem" }}>🔌</Typography>
+            </Box>
+            <Box>
+              <Typography
+                sx={{
+                  fontWeight: 900,
+                  fontSize: "1.25rem",
+                  color: "text.primary",
+                  lineHeight: 1,
+                  fontFeatureSettings: '"tnum"',
+                }}
+              >
+                {totalPlugins.toLocaleString()}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  color: "text.secondary",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Plugins Found
+              </Typography>
+            </Box>
+          </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Typography
               variant="caption"
@@ -446,14 +395,28 @@ function ResultToolbar({
               />
             )}
           </Box>
-
           <Box sx={{ display: { xs: "none", md: "block" } }}>
-            <Typography
-              variant="caption"
-              sx={{ fontWeight: 600, color: "text.secondary" }}
-            >
-              Real-time data from WordPress.org API
-            </Typography>
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <Select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                sx={{
+                  borderRadius: 3,
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  bgcolor: "rgba(15, 23, 42, 0.02)",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "1px solid rgba(15, 23, 42, 0.05)",
+                  },
+                }}
+              >
+                <MenuItem value="installation">📊 Most Installs</MenuItem>
+                <MenuItem value="star">⭐ Highest Rated</MenuItem>
+                <MenuItem value="updated">🔄 Recently Updated</MenuItem>
+                <MenuItem value="new">✨ Newest</MenuItem>
+                <MenuItem value="old">📅 Oldest</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Box>
       </Box>
