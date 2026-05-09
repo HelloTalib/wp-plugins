@@ -32,7 +32,7 @@ function ResultToolbar({
   setSortOption,
 }) {
   const getPlaceholder = () => {
-    if (searchType === "author") return "Search by author (e.g. wpxero)...";
+    if (searchType === "author") return "Search by author (e.g. automattic)...";
     if (searchType === "plugin") return "Search by plugin name (e.g. cache)...";
     return "Search by tag (e.g. seo)...";
   };
