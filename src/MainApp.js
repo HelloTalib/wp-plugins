@@ -49,8 +49,36 @@ function MainApp() {
 
   const parseWpDate = useCallback((dateString) => {
     if (!dateString) return null;
-    const parsedDate = new Date(dateString.replace(/(am|pm)/i, " $1").replace("GMT", ""));
-    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+
+    // WP API `last_updated` comes in two formats:
+    // "2025-11-09 4:31am GMT"  → strip meridiem marker and turn "GMT" into "UTC"
+    // "2025-11-09 04:31:00"    → already looks local — treat as UTC by appending Z
+    // "2025-11-09"             → date-only (for `added`) — treat as UTC midnight
+    let s = String(dateString).trim();
+
+    // Format: "2025-11-09 4:31am GMT" or "... pm GMT"
+    const gmtRe = /^(\d{4}-\d{2}-\d{2})\s+(\d{1,2}):(\d{2})(am|pm)\s*GMT$/i;
+    const gmtMatch = s.match(gmtRe);
+    if (gmtMatch) {
+      let hours = parseInt(gmtMatch[2], 10);
+      const mins = gmtMatch[3];
+      const meridiem = gmtMatch[4].toLowerCase();
+      if (meridiem === "pm" && hours !== 12) hours += 12;
+      if (meridiem === "am" && hours === 12) hours = 0;
+      const iso = `${gmtMatch[1]}T${String(hours).padStart(2, "0")}:${mins}:00Z`;
+      const d = new Date(iso);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    // Format: "2025-11-09" (date-only, used by `added`) — UTC midnight
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+      const d = new Date(s + "T00:00:00Z");
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    // Fallback: try native parse (e.g. ISO strings with Z already present)
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? null : d;
   }, []);
 
   const getUpdatedMeta = useCallback(
@@ -68,40 +96,57 @@ function MainApp() {
 
   const calculatePluginAge = useCallback((dateString) => {
     if (!dateString) return "Unknown age";
-    const createdDate = new Date(dateString);
-    if (Number.isNaN(createdDate.getTime())) return "Unknown age";
+    const createdDate = parseWpDate(dateString);
+    if (!createdDate) return "Unknown age";
 
-    const currentDate = new Date();
-    const diffInHours = (currentDate - createdDate) / (1000 * 60 * 60);
-    if (diffInHours < 24) return "New";
-    const diffInDays = Math.floor(diffInHours / 24);
-    const years = Math.floor(diffInDays / 365);
-    const months = Math.floor((diffInDays % 365) / 30);
-    const days = diffInDays % 30;
+    const nowMs = Date.now();
+    const diffMs = nowMs - createdDate.getTime();
+    if (diffMs < 0) return "Just created";
+
+    const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (totalDays < 1) return "New today";
+
+    const years = Math.floor(totalDays / 365);
+    const months = Math.floor((totalDays % 365) / 30);
+    const days = totalDays % 30;
+
     const parts = [];
     if (years > 0) parts.push(`${years}y`);
     if (months > 0) parts.push(`${months}m`);
-    if (days > 0 && years === 0) parts.push(`${days}d`); // Only show days if less than a year
-    return parts.join(" ") || "Just created";
-  }, []);
+    if (days > 0) parts.push(`${days}d`);
+    return parts.join(" ") || `${totalDays}d`;
+  }, [parseWpDate]);
 
   const calculateLastUpdated = useCallback(
     (dateString) => {
       const updatedDate = parseWpDate(dateString);
       if (!updatedDate) return "Invalid date";
-      const currentDate = new Date();
-      const diffInMinutes = Math.floor((currentDate - updatedDate) / (1000 * 60));
-      const diffInHours = Math.floor(diffInMinutes / 60);
-      const diffInDays = Math.floor(diffInHours / 24);
-      const diffInMonths = Math.floor(diffInDays / 30);
-      const diffInYears = Math.floor(diffInMonths / 12);
-      const parts = [];
-      if (diffInYears > 0) parts.push(`${diffInYears}yr`);
-      if (diffInMonths % 12 > 0) parts.push(`${diffInMonths % 12}mo`);
-      if (diffInDays % 30 > 0) parts.push(`${diffInDays % 30}d`);
-      if (diffInHours % 24 > 0) parts.push(`${diffInHours % 24}h`);
-      if (diffInMinutes % 60 > 0) parts.push(`${diffInMinutes % 60}m`);
-      return parts.length > 0 ? `${parts.join(" ")} ago` : "Just now";
+
+      const diffMs = Date.now() - updatedDate.getTime();
+      if (diffMs < 0) return "Just now";
+
+      const totalMinutes = Math.floor(diffMs / 60000);
+      const totalHours = Math.floor(totalMinutes / 60);
+      const totalDays = Math.floor(totalHours / 24);
+      const totalMonths = Math.floor(totalDays / 30);
+      const totalYears = Math.floor(totalMonths / 12);
+
+      if (totalMinutes < 1) return "Just now";
+      if (totalMinutes < 60) return `${totalMinutes}m ago`;
+      if (totalHours < 24) {
+        const mins = totalMinutes % 60;
+        return mins > 0 ? `${totalHours}h ${mins}m ago` : `${totalHours}h ago`;
+      }
+      if (totalDays < 30) {
+        const hrs = totalHours % 24;
+        return hrs > 0 ? `${totalDays}d ${hrs}h ago` : `${totalDays}d ago`;
+      }
+      if (totalMonths < 12) {
+        const days = totalDays % 30;
+        return days > 0 ? `${totalMonths}mo ${days}d ago` : `${totalMonths}mo ago`;
+      }
+      const months = totalMonths % 12;
+      return months > 0 ? `${totalYears}yr ${months}mo ago` : `${totalYears}yr ago`;
     },
     [parseWpDate]
   );

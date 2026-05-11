@@ -18,7 +18,7 @@ function PaginationBar({
       elevation={0}
       sx={{
         mt: 4,
-        p: { xs: 2.5, md: 3 },
+        p: { xs: 2, sm: 2.5, md: 3 },
         borderRadius: 5,
         border: "1px solid rgba(15, 23, 42, 0.05)",
         boxShadow: "0 10px 30px rgba(15, 23, 42, 0.05)",
@@ -59,22 +59,23 @@ function PaginationBar({
           display: "flex",
           justifyContent: "center",
           my: 1,
+          overflow: "hidden",
         }}
       >
         <Pagination
           count={totalPages}
           page={currentPage}
           onChange={(e, p) => onPageChange(p)}
-          size="large"
-          siblingCount={1}
+          size="medium"
+          siblingCount={0}
           boundaryCount={1}
           sx={{
             "& .MuiPaginationItem-root": {
               fontWeight: 800,
               borderRadius: 3,
-              height: 44,
-              minWidth: 44,
-              fontSize: "0.85rem",
+              height: { xs: 36, sm: 44 },
+              minWidth: { xs: 36, sm: 44 },
+              fontSize: { xs: "0.78rem", sm: "0.85rem" },
               color: "text.secondary",
               transition: "all 0.2s ease",
               "&:hover": {
@@ -130,13 +131,13 @@ function PaginationBar({
             onChange={(e) => setJumpPage(e.target.value)}
             placeholder={`1–${totalPages}`}
             inputProps={{ min: 1, max: totalPages }}
-            sx={{ 
-              width: 100, 
-              "& .MuiOutlinedInput-root": { 
+            sx={{
+              width: 100,
+              "& .MuiOutlinedInput-root": {
                 borderRadius: 2.5,
                 bgcolor: "rgba(15, 23, 42, 0.02)",
                 "& fieldset": { borderColor: "rgba(15, 23, 42, 0.08)" }
-              } 
+              }
             }}
           />
           <Button

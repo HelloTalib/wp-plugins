@@ -303,17 +303,20 @@ function ResultToolbar({
           </Box>
         </Box>
 
-        {/* ── Bottom Bar: Filter Status ── */}
+        {/* ── Bottom Bar: Filter Status & Sort ── */}
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "flex-start", sm: "center" },
             justifyContent: "space-between",
+            gap: { xs: 1.5, sm: 0 },
             mt: 3,
             pt: 2,
             borderTop: "1px solid rgba(15, 23, 42, 0.04)",
           }}
         >
+          {/* Plugin count */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
               sx={{
@@ -326,6 +329,7 @@ function ResultToolbar({
                 alignItems: "center",
                 justifyContent: "center",
                 border: "1px solid rgba(99, 102, 241, 0.1)",
+                flexShrink: 0,
               }}
             >
               <Typography sx={{ fontSize: "1.4rem" }}>🔌</Typography>
@@ -355,18 +359,17 @@ function ResultToolbar({
               </Typography>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 900,
-                color: "text.secondary",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-              }}
-            >
-              Filter
-            </Typography>
+
+          {/* Filter chip + Sort — stacked on xs, inline on sm+ */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 1.5,
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
             {activeSearch ? (
               <Chip
                 label={`${activeSearch.type}: ${activeSearch.value}`}
@@ -394,9 +397,8 @@ function ResultToolbar({
                 }}
               />
             )}
-          </Box>
-          <Box sx={{ display: { xs: "none", md: "block" } }}>
-            <FormControl size="small" sx={{ minWidth: 180 }}>
+
+            <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 180 } }}>
               <Select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}

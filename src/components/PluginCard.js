@@ -155,8 +155,13 @@ function PluginCard({
             </Box>
           </Box>
 
-          {/* Rank badge */}
+          {/* Rank badge — links to WPMonitor stats */}
           <Box
+            component="a"
+            href={`https://wpmonitor.dev/plugins/${plugin.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View stats on WPMonitor"
             sx={{
               width: 36,
               height: 36,
@@ -167,6 +172,12 @@ function PluginCard({
               justifyContent: "center",
               flexShrink: 0,
               boxShadow: "0 4px 12px rgba(99, 102, 241, 0.25)",
+              textDecoration: "none",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              "&:hover": {
+                transform: "scale(1.1)",
+                boxShadow: "0 6px 18px rgba(99, 102, 241, 0.4)",
+              },
             }}
           >
             <Typography
