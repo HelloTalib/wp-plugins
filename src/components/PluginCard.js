@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -7,12 +7,48 @@ import {
   CardMedia,
   Chip,
   LinearProgress,
+  Tooltip,
   Typography,
 } from "@mui/material";
+
+function parseMinorVer(ver) {
+  if (!ver) return -1;
+  const parts = String(ver).split(".").map(Number);
+  return (parts[0] || 0) * 100 + (parts[1] || 0);
+}
+
+function getWpCompat(tested, latestWpVersion) {
+  if (!tested) return null;
+  const latest = latestWpVersion || "6.7";
+  const tScore = parseMinorVer(tested);
+  const lScore = parseMinorVer(latest);
+  const diff = lScore - tScore;
+  if (diff <= 0)
+    return {
+      label: `WP ${tested} ✓`,
+      color: "#059669",
+      bg: "rgba(5,150,105,0.1)",
+      tip: `Tested up to WP ${tested} — compatible with latest (${latest})`,
+    };
+  if (diff <= 2)
+    return {
+      label: `WP ${tested}`,
+      color: "#d97706",
+      bg: "rgba(217,119,6,0.1)",
+      tip: `Tested up to WP ${tested} — ${diff} version(s) behind latest (${latest})`,
+    };
+  return {
+    label: `WP ${tested}`,
+    color: "#ef4444",
+    bg: "rgba(239,68,68,0.1)",
+    tip: `Tested up to WP ${tested} — significantly behind latest (${latest})`,
+  };
+}
 
 function PluginCard({
   plugin,
   rank,
+  latestWpVersion,
   formatActiveInstalls,
   calculatePluginAge,
   calculateLastUpdated,
@@ -21,6 +57,8 @@ function PluginCard({
   onTagClick,
   animationDelay,
 }) {
+  const [showAllTags, setShowAllTags] = useState(false);
+
   const username = plugin.author_profile
     ? plugin.author_profile.split("/").filter(Boolean).pop()
     : "Unknown";
@@ -36,6 +74,7 @@ function PluginCard({
         : rawUpdated;
 
   const version = plugin.version ? `v${plugin.version}` : "—";
+  const wpCompat = getWpCompat(plugin.tested, latestWpVersion);
 
   const decode = (str = "") =>
     String(str)
@@ -46,6 +85,9 @@ function PluginCard({
   const installsFormatted = formatActiveInstalls(plugin.active_installs);
   const ratingPct = Math.min(100, (displayRating / 5) * 100);
   const age = calculatePluginAge(plugin.added);
+  const allTagKeys = plugin.tags ? Object.keys(plugin.tags) : [];
+  const visibleTagKeys = showAllTags ? allTagKeys : allTagKeys.slice(0, 3);
+  const hasMoreTags = allTagKeys.length > 3;
 
   return (
     <Card
@@ -77,36 +119,50 @@ function PluginCard({
             pb: 2,
           }}
         >
-          {/* Plugin icon */}
-          <Box
-            sx={{
-              width: 52,
-              height: 52,
-              flexShrink: 0,
-              borderRadius: 3,
-              background: "linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%)",
-              border: "1px solid rgba(15, 23, 42, 0.05)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-              transition: "all 0.3s ease",
-            }}
-          >
-            <CardMedia
-              component="img"
-              sx={{ width: 36, height: 36, objectFit: "contain" }}
-              image={
-                plugin.icons?.["2x"] ||
-                plugin.icons?.["1x"] ||
-                plugin.icons?.default ||
-                "https://s.w.org/plugins/geopattern-icon/classic-widgets.svg"
-              }
-              alt=""
-            />
-          </Box>
+          {/* Plugin icon — links to wp-rankings.com */}
+          <Tooltip title={`View on WP Rankings`} arrow placement="top">
+            <Box
+              component="a"
+              href={`https://wp-rankings.com/plugins/${plugin.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                width: 52,
+                height: 52,
+                flexShrink: 0,
+                borderRadius: 3,
+                background:
+                  "linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%)",
+                border: "1px solid rgba(15, 23, 42, 0.05)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                transition: "all 0.3s ease",
+                textDecoration: "none",
+                cursor: "pointer",
+                "&:hover": {
+                  border: "1.5px solid rgba(99, 102, 241, 0.3)",
+                  boxShadow: "0 4px 14px rgba(99, 102, 241, 0.18)",
+                  transform: "scale(1.07)",
+                },
+              }}
+            >
+              <CardMedia
+                component="img"
+                sx={{ width: 36, height: 36, objectFit: "contain" }}
+                image={
+                  plugin.icons?.["2x"] ||
+                  plugin.icons?.["1x"] ||
+                  plugin.icons?.default ||
+                  "https://s.w.org/plugins/geopattern-icon/classic-widgets.svg"
+                }
+                alt=""
+              />
+            </Box>
+          </Tooltip>
 
-          {/* Title + version */}
+          {/* Title + version + WP compat */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               variant="subtitle1"
@@ -126,7 +182,14 @@ function PluginCard({
             >
               {decode(plugin.name)}
             </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                flexWrap: "wrap",
+              }}
+            >
               <Chip
                 label={version}
                 size="small"
@@ -141,6 +204,25 @@ function PluginCard({
                   "& .MuiChip-label": { px: 0.75 },
                 }}
               />
+              {wpCompat && (
+                <Tooltip title={wpCompat.tip} arrow placement="top">
+                  <Chip
+                    label={wpCompat.label}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontWeight: 800,
+                      fontSize: "0.65rem",
+                      borderRadius: 1.5,
+                      bgcolor: wpCompat.bg,
+                      color: wpCompat.color,
+                      border: `1px solid ${wpCompat.color}33`,
+                      "& .MuiChip-label": { px: 0.75 },
+                      cursor: "help",
+                    }}
+                  />
+                </Tooltip>
+              )}
               <Typography
                 variant="caption"
                 sx={{
@@ -150,48 +232,53 @@ function PluginCard({
                   opacity: 0.7,
                 }}
               >
-                {age === "New" ? "🆕 New" : age === "Unknown age" ? "Age unknown" : `${age} old`}
+                {age === "New"
+                  ? "🆕 New"
+                  : age === "Unknown age"
+                    ? "Age unknown"
+                    : `${age} old`}
               </Typography>
             </Box>
           </Box>
 
           {/* Rank badge — links to WPMonitor stats */}
-          <Box
-            component="a"
-            href={`https://wpmonitor.dev/plugins/${plugin.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="View stats on WPMonitor"
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: 2.5,
-              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              boxShadow: "0 4px 12px rgba(99, 102, 241, 0.25)",
-              textDecoration: "none",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-              "&:hover": {
-                transform: "scale(1.1)",
-                boxShadow: "0 6px 18px rgba(99, 102, 241, 0.4)",
-              },
-            }}
-          >
-            <Typography
+          <Tooltip title={`View on WP Monitor`} arrow placement="top">
+            <Box
+              component="a"
+              href={`https://wpmonitor.dev/plugins/${plugin.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
               sx={{
-                fontWeight: 900,
-                color: "#fff",
-                fontSize: "0.75rem",
-                fontFeatureSettings: '"tnum"',
-                lineHeight: 1,
+                width: 36,
+                height: 36,
+                borderRadius: 2.5,
+                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: "0 4px 12px rgba(99, 102, 241, 0.25)",
+                textDecoration: "none",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                "&:hover": {
+                  transform: "scale(1.1)",
+                  boxShadow: "0 6px 18px rgba(99, 102, 241, 0.4)",
+                },
               }}
             >
-              #{rank}
-            </Typography>
-          </Box>
+              <Typography
+                sx={{
+                  fontWeight: 900,
+                  color: "#fff",
+                  fontSize: "0.75rem",
+                  fontFeatureSettings: '"tnum"',
+                  lineHeight: 1,
+                }}
+              >
+                #{rank}
+              </Typography>
+            </Box>
+          </Tooltip>
         </Box>
 
         {/* Description */}
@@ -237,8 +324,17 @@ function PluginCard({
           >
             {displayRating > 0 ? (
               <>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 72 }}>
-                  <Typography sx={{ fontSize: "0.85rem", lineHeight: 1 }}>⭐</Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    minWidth: 72,
+                  }}
+                >
+                  <Typography sx={{ fontSize: "0.85rem", lineHeight: 1 }}>
+                    ⭐
+                  </Typography>
                   <Typography
                     variant="caption"
                     sx={{
@@ -272,7 +368,15 @@ function PluginCard({
                 />
               </>
             ) : (
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.72rem", py: 0.2 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 700,
+                  fontSize: "0.72rem",
+                  py: 0.2,
+                }}
+              >
                 No ratings yet
               </Typography>
             )}
@@ -289,7 +393,9 @@ function PluginCard({
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Typography sx={{ fontSize: "0.72rem", lineHeight: 1 }}>📥</Typography>
+              <Typography sx={{ fontSize: "0.72rem", lineHeight: 1 }}>
+                📥
+              </Typography>
               <Typography
                 variant="caption"
                 sx={{
@@ -303,7 +409,11 @@ function PluginCard({
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.68rem" }}
+                sx={{
+                  fontWeight: 600,
+                  color: "text.secondary",
+                  fontSize: "0.68rem",
+                }}
               >
                 installs
               </Typography>
@@ -371,7 +481,8 @@ function PluginCard({
                 width: 22,
                 height: 22,
                 borderRadius: 1.5,
-                background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08))",
+                background:
+                  "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08))",
                 fontSize: "0.65rem",
                 fontWeight: 900,
                 color: "primary.main",
@@ -385,36 +496,65 @@ function PluginCard({
         </Box>
 
         {/* Tags */}
-        <Box sx={{ px: 2.5, display: "flex", gap: 0.5, flexWrap: "wrap", mb: 2, minHeight: 26 }}>
-          {plugin.tags &&
-            Object.keys(plugin.tags)
-              .slice(0, 3)
-              .map((tagKey) => (
-                <Chip
-                  key={tagKey}
-                  size="small"
-                  label={plugin.tags[tagKey]}
-                  onClick={() => onTagClick(plugin.tags[tagKey])}
-                  sx={{
-                    fontWeight: 700,
-                    height: 24,
-                    fontSize: "0.68rem",
-                    borderRadius: 1.5,
-                    bgcolor: "rgba(99, 102, 241, 0.05)",
-                    color: "primary.main",
-                    border: "1px solid rgba(99, 102, 241, 0.08)",
-                    transition: "all 0.25s ease",
-                    cursor: "pointer",
-                    "&:hover": {
-                      bgcolor: "rgba(99, 102, 241, 0.1)",
-                      borderColor: "rgba(99, 102, 241, 0.2)",
-                      transform: "translateY(-1px)",
-                    },
-                  }}
-                />
-              ))}
+        <Box
+          sx={{
+            px: 2.5,
+            display: "flex",
+            gap: 0.5,
+            flexWrap: "wrap",
+            mb: 2,
+            minHeight: 26,
+          }}
+        >
+          {visibleTagKeys.map((tagKey) => (
+            <Chip
+              key={tagKey}
+              size="small"
+              label={plugin.tags[tagKey]}
+              onClick={() => onTagClick(plugin.tags[tagKey])}
+              sx={{
+                fontWeight: 700,
+                height: 24,
+                fontSize: "0.68rem",
+                borderRadius: 1.5,
+                bgcolor: "rgba(99, 102, 241, 0.05)",
+                color: "primary.main",
+                border: "1px solid rgba(99, 102, 241, 0.08)",
+                transition: "all 0.25s ease",
+                cursor: "pointer",
+                "&:hover": {
+                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                  borderColor: "rgba(99, 102, 241, 0.2)",
+                  transform: "translateY(-1px)",
+                },
+              }}
+            />
+          ))}
+          {hasMoreTags && (
+            <Chip
+              size="small"
+              label={showAllTags ? "− less" : `+${allTagKeys.length - 3} more`}
+              onClick={() => setShowAllTags((v) => !v)}
+              sx={{
+                fontWeight: 700,
+                height: 24,
+                fontSize: "0.68rem",
+                borderRadius: 1.5,
+                bgcolor: showAllTags
+                  ? "rgba(15,23,42,0.07)"
+                  : "rgba(15,23,42,0.04)",
+                color: "text.secondary",
+                border: "1px solid rgba(15,23,42,0.08)",
+                transition: "all 0.25s ease",
+                cursor: "pointer",
+                "&:hover": {
+                  bgcolor: "rgba(15,23,42,0.09)",
+                  transform: "translateY(-1px)",
+                },
+              }}
+            />
+          )}
         </Box>
-
 
         {/* CTA Button */}
         <Box sx={{ px: 2.5, pb: 2.5, mt: "auto" }}>
@@ -430,7 +570,8 @@ function PluginCard({
               fontWeight: 700,
               fontSize: "0.84rem",
               letterSpacing: "0.01em",
-              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)",
+              background:
+                "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)",
               backgroundSize: "200% 200%",
               transition: "all 0.4s ease",
               "&:hover": {

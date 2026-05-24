@@ -6,6 +6,7 @@ function PluginGrid({
   plugins,
   currentPage,
   perPage,
+  latestWpVersion,
   formatActiveInstalls,
   calculatePluginAge,
   calculateLastUpdated,
@@ -20,6 +21,7 @@ function PluginGrid({
           <PluginCard
             plugin={plugin}
             rank={(currentPage - 1) * perPage + index + 1}
+            latestWpVersion={latestWpVersion}
             formatActiveInstalls={formatActiveInstalls}
             calculatePluginAge={calculatePluginAge}
             calculateLastUpdated={calculateLastUpdated}
